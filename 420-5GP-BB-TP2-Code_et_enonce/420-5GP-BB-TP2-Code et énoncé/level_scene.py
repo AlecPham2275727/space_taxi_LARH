@@ -28,7 +28,6 @@ class LevelScene(Scene):
         super().__init__()
 
         self._level = level
-        self._current_astronaut_index = 0
         self._surface = pygame.image.load("img/space01.png").convert_alpha()
         self._music = pygame.mixer.Sound("snd/476556__magmisoundtracks__sci-fi-music-loop-01.wav")
         self._music_started = False
@@ -61,11 +60,21 @@ class LevelScene(Scene):
                       Pad(5, "img/pad05.png", (1040, 380), 30, 120)]
         self._pad_sprites = pygame.sprite.Group()
         self._pad_sprites.add(self._pads)
+        self._objectives = self.determinate_objectives()
 
         self._reinitialize()
         self._hud.visible = True
-    def determiner_objectifs(self):
-        pass
+
+    def determinate_objectives(self):
+        objectives = (
+            [(self._pads[3], self._pads[0]),
+             (self._pads[2], self._pads[4]),
+             (self._pads[0], self._pads[1]),
+             (self._pads[4], self._pads[2]),
+             (self._pads[1], self._pads[3]),
+             (self._pads[0], Pad.UP, self._gate)]
+        )
+        return objectives
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """ Gère les événements PyGame. """
@@ -113,7 +122,7 @@ class LevelScene(Scene):
                         SceneManager().change_scene(f"level{self._level + 1}_load", LevelScene._FADE_OUT_DURATION)
                         return
             elif self._astronaut.has_reached_destination():
-                if self._nb_taxied_astronauts < len(self._astronauts) - 1:
+                if self._nb_taxied_astronauts < len(self._objectives) - 1:
                     self._nb_taxied_astronauts += 1
                     self._astronaut = None
                     self._last_taxied_astronaut_time = time.time()
@@ -127,7 +136,8 @@ class LevelScene(Scene):
                 self._astronaut.wait()
         else:
             if time.time() - self._last_taxied_astronaut_time >= LevelScene._TIME_BETWEEN_ASTRONAUTS:
-                self._astronaut = self._astronauts[self._nb_taxied_astronauts]
+                print(self._nb_taxied_astronauts)
+                self._astronaut = self.spawn_astronaut(self._nb_taxied_astronauts)
 
         self._taxi.update()
 
@@ -175,14 +185,15 @@ class LevelScene(Scene):
         self._retry_current_astronaut()
         self._hud.reset()
 
+    def spawn_astronaut(self, index) -> Astronaut:
+        objectives = self._objectives[index]
+        if index == len(self._objectives)-1:
+            return Astronaut(objectives[0], objectives[1], objectives[2])
+        else:
+            return Astronaut(objectives[0], objectives[1])
+
     def _retry_current_astronaut(self) -> None:
         """ Replace le niveau dans l'état où il était avant la course actuelle. """
-        self._gate.close()
-        self._astronauts = [Astronaut(self._pads[3], self._pads[0]),
-                            Astronaut(self._pads[2], self._pads[4]),
-                            Astronaut(self._pads[0], self._pads[1]),
-                            Astronaut(self._pads[4], self._pads[2]),
-                            Astronaut(self._pads[1], self._pads[3]),
-                            Astronaut(self._pads[0], Pad.UP, self._gate)]
+
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None
