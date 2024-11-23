@@ -28,6 +28,7 @@ class LevelScene(Scene):
         super().__init__()
 
         self._level = level
+        self._current_astronaut_index = 0
         self._surface = pygame.image.load("img/space01.png").convert_alpha()
         self._music = pygame.mixer.Sound("snd/476556__magmisoundtracks__sci-fi-music-loop-01.wav")
         self._music_started = False
@@ -63,6 +64,8 @@ class LevelScene(Scene):
 
         self._reinitialize()
         self._hud.visible = True
+    def determiner_objectifs(self):
+        pass
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """ Gère les événements PyGame. """
@@ -175,11 +178,11 @@ class LevelScene(Scene):
     def _retry_current_astronaut(self) -> None:
         """ Replace le niveau dans l'état où il était avant la course actuelle. """
         self._gate.close()
-        self._astronauts = [Astronaut(self._pads[3], self._pads[0], 20.00),
-                            Astronaut(self._pads[2], self._pads[4], 20.00),
-                            Astronaut(self._pads[0], self._pads[1], 20.00),
-                            Astronaut(self._pads[4], self._pads[2], 20.00),
-                            Astronaut(self._pads[1], self._pads[3], 20.00),
-                            Astronaut(self._pads[0], Pad.UP, 20.00)]
+        self._astronauts = [Astronaut(self._pads[3], self._pads[0]),
+                            Astronaut(self._pads[2], self._pads[4]),
+                            Astronaut(self._pads[0], self._pads[1]),
+                            Astronaut(self._pads[4], self._pads[2]),
+                            Astronaut(self._pads[1], self._pads[3]),
+                            Astronaut(self._pads[0], Pad.UP, self._gate)]
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None

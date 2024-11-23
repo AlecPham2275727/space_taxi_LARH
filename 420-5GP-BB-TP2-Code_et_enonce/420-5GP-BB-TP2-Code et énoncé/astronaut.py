@@ -1,9 +1,12 @@
+import math
+
 import pygame
 import random
 import time
 
 from enum import Enum, auto
 from pad import Pad
+from gate import Gate
 
 
 class AstronautState(Enum):
@@ -35,7 +38,7 @@ class Astronaut(pygame.sprite.Sprite):
                     AstronautState.JUMPING_LEFT: 0.15,
                     AstronautState.JUMPING_RIGHT: 0.15}
 
-    def __init__(self, source_pad: Pad, target_pad: Pad, trip_money: float) -> None:
+    def __init__(self, source_pad: Pad, target_pad: Pad, gate: Gate = None) -> None:
         """
         Initialise une instance d'astronaute.
         :param source_pad: le pad sur lequel apparaîtra l'astronaute
@@ -44,10 +47,11 @@ class Astronaut(pygame.sprite.Sprite):
         """
         super(Astronaut, self).__init__()
 
+        self._gate = gate
         self._source_pad = source_pad
         self._target_pad = target_pad
 
-        self._trip_money = trip_money
+        self._trip_money = self.calculate_trip_price()
         self._time_is_money = 0.0
         self._last_saved_time = None
 
@@ -76,6 +80,16 @@ class Astronaut(pygame.sprite.Sprite):
         self._state_time = 0  # temps écoulé dans l'état actuel
         self._current_frame = 0
         self._last_frame_time = time.time()
+
+    def calculate_trip_price(self):
+        origin = (self.source_pad.rect.x, self.source_pad.rect.y)
+        if self.target_pad is Pad.UP:
+            # L'objectif va être considéré la porte de sortie vue que Pad.UP n'a pas un rect
+            target = (self._gate.rect.x, self._gate.rect.y)
+        else:
+            target = (self._target_pad.rect.x, self._target_pad.rect.y)
+        trip_price = math.sqrt(((target[0] - origin[0]) ** 2) + ((target[1] - origin[1]) ** 2))
+        return round(trip_price)/4
 
     @property
     def source_pad(self) -> Pad:
