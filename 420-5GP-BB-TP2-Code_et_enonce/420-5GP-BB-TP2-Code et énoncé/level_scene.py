@@ -131,12 +131,11 @@ class LevelScene(Scene):
             elif self._taxi.pad_landed_on:
                 if self._taxi.pad_landed_on.number == self._astronaut.source_pad.number:
                     if self._astronaut.is_waiting_for_taxi():
-                        self._astronaut.jump(self._taxi.rect.x)
+                        self._astronaut.jump(self._taxi.rect.x+20)
             elif self._astronaut.is_jumping_on_starting_pad():
                 self._astronaut.wait()
         else:
             if time.time() - self._last_taxied_astronaut_time >= LevelScene._TIME_BETWEEN_ASTRONAUTS:
-                print(self._nb_taxied_astronauts)
                 self._astronaut = self.spawn_astronaut(self._nb_taxied_astronauts)
 
         self._taxi.update()
