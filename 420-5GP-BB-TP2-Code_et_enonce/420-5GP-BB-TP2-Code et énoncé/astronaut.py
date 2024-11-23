@@ -30,10 +30,10 @@ class Astronaut(pygame.sprite.Sprite):
     _WAVING_DELAYS = 10.0, 30.0
 
     # temps d'affichage pour les trames de chaque état affiché/animé
-    _FRAME_TIMES = { AstronautState.WAITING : 0.1,
-                     AstronautState.WAVING : 0.1,
-                     AstronautState.JUMPING_LEFT : 0.15,
-                     AstronautState.JUMPING_RIGHT : 0.15}
+    _FRAME_TIMES = {AstronautState.WAITING: 0.1,
+                    AstronautState.WAVING: 0.1,
+                    AstronautState.JUMPING_LEFT: 0.15,
+                    AstronautState.JUMPING_RIGHT: 0.15}
 
     def __init__(self, source_pad: Pad, target_pad: Pad, trip_money: float) -> None:
         """
@@ -251,15 +251,25 @@ class Astronaut(pygame.sprite.Sprite):
 
         # astronaute qui envoie la main (les _NB_WAVING_IMAGES prochaines images)
         waving_frames = []
+        waving_frames_collection = []
         first_frame = Astronaut._NB_WAITING_IMAGES
+
         for frame in range(first_frame, first_frame + Astronaut._NB_WAVING_IMAGES):
             surface = pygame.Surface(image_size, flags=pygame.SRCALPHA)
             source_rect = surface.get_rect()
             source_rect.x = frame * source_rect.width
             surface.blit(sprite_sheet, (0, 0), source_rect)
             mask = pygame.mask.from_surface(surface)
-            waving_frames.append((surface, mask))
-        waving_frames.extend(waving_frames[1:-1][::-1])
+            waving_frames_collection.append((surface, mask))
+
+        waving_frames_collection.extend(waving_frames_collection[1:-1][::-1])
+        repeated_frames = [waving_frames_collection[1], waving_frames_collection[2], waving_frames_collection[3],
+                           waving_frames_collection[2], waving_frames_collection[1]]
+
+        waving_frames.extend([waving_frames_collection[0]])
+        for i in range(3):
+            waving_frames.extend(repeated_frames)
+        waving_frames.extend([waving_frames_collection[0]])
 
         # astronaute qui se déplace en sautant (les _NB_JUMPING_IMAGES prochaines images)
         jumping_left_frames = []
