@@ -1,3 +1,9 @@
+# CRÉDIT: Pour la tâche des réacteurs qui tue l'astronaute, j'ai consulté les sources suivantes:
+# https://www.pygame.org/docs/ref/mask.html
+# https://scuba.cs.uchicago.edu/pygame/ref/mask.html#pygame.mask.Mask.overlap
+# https://stackoverflow.com/questions/67846651/pygame-masks-python
+# https://www.pygame.org/docs/ref/mask.html#pygame.mask.Mask.draw
+
 from enum import Enum, auto
 
 import pygame
@@ -90,7 +96,7 @@ class Taxi(pygame.sprite.Sprite):
             return False
 
         if self.rect.colliderect(obstacle.rect):
-            if pygame.sprite.collide_mask(self, obstacle):
+            if self.mask.overlap(obstacle.mask, (obstacle.rect.x - self.rect.x, obstacle.rect.y - self.rect.y)):
                 self._flags = self._FLAG_DESTROYED
                 self._crash_sound.play()
                 self._velocity_x = 0.0
@@ -110,7 +116,7 @@ class Taxi(pygame.sprite.Sprite):
             return False
 
         if self.rect.colliderect(pad.rect):
-            if pygame.sprite.collide_mask(self, pad):
+            if self.mask.overlap(pad.mask, (pad.rect.x - self.rect.x, pad.rect.y - self.rect.y)):
                 self._flags = self._FLAG_DESTROYED
                 self._crash_sound.play()
                 self._velocity_x = 0.0
@@ -130,7 +136,7 @@ class Taxi(pygame.sprite.Sprite):
             return False
 
         if self.rect.colliderect(pump.rect):
-            if pygame.sprite.collide_mask(self, pump):
+            if self.mask.overlap(pump.mask, (pump.rect.x - self.rect.x, pump.rect.y - self.rect.y)):
                 self._flags = self._FLAG_DESTROYED
                 self._crash_sound.play()
                 self._velocity_x = 0.0
@@ -157,6 +163,7 @@ class Taxi(pygame.sprite.Sprite):
 
                     self._select_image()
 
+
     def has_exited(self) -> bool:
         """
         Vérifie si le taxi a quitté le niveau (par la sortie).
@@ -170,11 +177,12 @@ class Taxi(pygame.sprite.Sprite):
         :param astronaut: astronaute pour lequel vérifier
         :return: True si le taxi frappe l'astronaute, False sinon
         """
+        
         if self._pad_landed_on or astronaut.is_onboard():
             return False
-
+    
         if self.rect.colliderect(astronaut.rect):
-            if pygame.sprite.collide_mask(self, astronaut):
+            if self.mask_taxi_reactor.overlap(astronaut.mask, (astronaut.rect.x - self.rect.x, astronaut.rect.y - self.rect.y)):
                 return True
 
         return False
@@ -275,6 +283,27 @@ class Taxi(pygame.sprite.Sprite):
 
         # ÉTAPE 4 - sélectionner la bonne image en fonction de l'état du taxi
         self._select_image()
+
+        self._combine_reactor_mask()
+
+    def _combine_reactor_mask(self) -> None:
+        facing = self._flags & Taxi._FLAG_LEFT
+
+        mask_with_reactor = pygame.mask.from_surface(self.image)
+
+        reactors = [
+        (Taxi._FLAG_BOTTOM_REACTOR, ImgSelector.BOTTOM_REACTOR), 
+        (Taxi._FLAG_TOP_REACTOR, ImgSelector.TOP_REACTOR),     
+        (Taxi._FLAG_REAR_REACTOR, ImgSelector.REAR_REACTOR)
+    ]
+
+        for flag, selector in reactors:
+            if self._flags & flag:
+                reactor_mask = self._masks[selector][facing]
+                mask_with_reactor.draw(reactor_mask, (0, 0))
+
+        self.mask_taxi_reactor = mask_with_reactor
+
 
     def _handle_keys(self) -> None:
         """ Change ou non l'état du taxi en fonction des touches présentement enfoncées. """
