@@ -23,7 +23,7 @@ class LevelLoadingScene(Scene):
                 self._fade_out_start_time = pygame.time.get_ticks()
                 SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION)
 
-    def update(self, delta_time: float) -> None:
+    def update(self) -> None:
         if not self._music_started:
             self._music.play()
             self._music_started = True
