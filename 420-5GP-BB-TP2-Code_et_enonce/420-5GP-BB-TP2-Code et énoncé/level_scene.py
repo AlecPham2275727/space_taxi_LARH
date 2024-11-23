@@ -104,6 +104,7 @@ class LevelScene(Scene):
                     if self._gate.is_closed():
                         self._gate.open()
                     elif self._taxi.has_exited():
+                        self._taxi.stop_reactor_sound()
                         self._taxi.unboard_astronaut()
                         self._taxi = None
                         self._fade_out_start_time = pygame.time.get_ticks()
