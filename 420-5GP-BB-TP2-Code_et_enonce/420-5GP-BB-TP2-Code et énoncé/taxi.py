@@ -155,6 +155,11 @@ class Taxi(pygame.sprite.Sprite):
         :return: True si le taxi est sorti du niveau, False sinon
         """
         return self.rect.y <= -self.rect.height
+    
+
+    def stop_reactor_sound(self) -> None:
+        self._reactor_sound.stop()
+
 
     def hit_astronaut(self, astronaut: Astronaut) -> bool:
         """

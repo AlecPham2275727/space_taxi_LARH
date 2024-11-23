@@ -75,10 +75,9 @@ class LevelScene(Scene):
         if self._taxi:
             self._taxi.handle_event(event)
 
-    def update(self, delta_time: float) -> None:
+    def update(self) -> None:
         """
         Met à jour le niveau de jeu. Cette méthode est appelée à chaque itération de la boucle de jeu.
-        :param delta_time: temps écoulé (en secondes) depuis la dernière trame affichée
         """
         if not self._music_started:
             self._music.play(-1)
@@ -104,6 +103,7 @@ class LevelScene(Scene):
                     if self._gate.is_closed():
                         self._gate.open()
                     elif self._taxi.has_exited():
+                        self._taxi.stop_reactor_sound()
                         self._taxi.unboard_astronaut()
                         self._taxi = None
                         self._fade_out_start_time = pygame.time.get_ticks()
