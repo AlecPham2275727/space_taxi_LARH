@@ -182,18 +182,12 @@ class Astronaut(pygame.sprite.Sprite):
         if self._state == AstronautState.WAITING:
             if self._state_time >= self._waving_delay:
                 self._call_taxi()
-                self._state = AstronautState.WAVING
-                self._state_time = 0
-                self._frames = self._all_frames[AstronautState.WAVING]
-                self._current_frame = 0
+                self.change_state(AstronautState.WAVING)
         elif self._state == AstronautState.WAVING:
             last_frame = self._current_frame == len(self._frames) - 1
             spent_state_time = self._state_time >= self._FRAME_TIMES[AstronautState.WAVING] * len(self._frames)
             if last_frame and spent_state_time:
-                self._state = AstronautState.WAITING
-                self._state_time = 0
-                self._frames = self._all_frames[AstronautState.WAITING]
-                self._current_frame = 0
+                self.change_state(AstronautState.WAITING)
                 self._waving_delay = random.uniform(*Astronaut._WAVING_DELAYS)
         elif self._state in (AstronautState.JUMPING_RIGHT, AstronautState.JUMPING_LEFT):
             if self.rect.x == self._target_x:
@@ -212,6 +206,12 @@ class Astronaut(pygame.sprite.Sprite):
             self.rect.x = round(self._pos_x)
 
         self.image, self.mask = self._frames[self._current_frame]
+
+    def change_state(self, entered_state):
+        self._state = entered_state
+        self._state_time = 0
+        self._frames = self._all_frames[entered_state]
+        self._current_frame = 0
 
     def wait(self) -> None:
         """ Replace l'astronaute dans l'état d'attente. """
