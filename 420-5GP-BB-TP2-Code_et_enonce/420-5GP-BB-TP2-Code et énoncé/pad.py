@@ -22,6 +22,8 @@ class Pad(pygame.sprite.Sprite):
         """
         super(Pad, self).__init__()
 
+        self._label_text_offset = None
+        self._label_background_offset = None
         self.number = number
         self.image = pygame.image.load(filename).convert_alpha()
         self.mask = pygame.mask.from_surface(self.image)
@@ -34,8 +36,12 @@ class Pad(pygame.sprite.Sprite):
         background_width = text_width + background_height  # + hauteur, pour les coins arrondis
         self._label_background = Pad._build_label(background_width, background_height)
 
-        self._label_text_offset = ((self.image.get_width() - text_width) / 2 + 1, 3)
-        self._label_background_offset = ((self.image.get_width() - background_width) / 2, 2)
+        if number != 2 and number != 5:
+            self.center_label(text_width, background_width, 2)
+        elif number == 2:
+            self.center_label(text_width, background_width, 2.5)
+        else:
+            self.center_label(text_width, background_width, 1.5)
 
         self.image.blit(self._label_background, self._label_background_offset)#, special_flags = pygame.BLEND_RGBA_ADD)
         self.image.blit(self._label_text, self._label_text_offset)
@@ -46,6 +52,10 @@ class Pad(pygame.sprite.Sprite):
 
         self.astronaut_start = pygame.Vector2(self.rect.x + astronaut_start_x, self.rect.y - 24)
         self.astronaut_end = pygame.Vector2(self.rect.x + astronaut_end_x, self.rect.y - 24)
+
+    def center_label(self, text_width: int, background_width: int, divisor: float):
+        self._label_text_offset = ((self.image.get_width() - text_width) / divisor + 1, 3)
+        self._label_background_offset = ((self.image.get_width() - background_width) / divisor, 2)
 
     def draw(self, surface: pygame.Surface) -> None:
         surface.blit(self.image, self.rect)
