@@ -29,7 +29,7 @@ class SceneManager:
         self._scenes[name] = scene
 
     def set_scene(self, name: str) -> None:
-        self._current_scene = self._scenes.get(name, self._current_scene)
+        self._current_scene = self._scenes.get(name)
 
     def change_scene(self, name: str, fade_duration: int = 0) -> None:
         self._next_scene = self._scenes.get(name, self._current_scene)
