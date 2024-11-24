@@ -239,14 +239,14 @@ class Taxi(pygame.sprite.Sprite):
 
     def unboard_astronaut(self) -> None:
         """ Fait descendre l'astronaute qui se trouve à bord. """
+        self._astronaut.set_arrived_target(True)
         if self._astronaut.target_pad is not Pad.UP:
             self._astronaut.move(self.rect.x, self._pad_landed_on.rect.y - self._astronaut.rect.height)
             self._astronaut.jump(self._pad_landed_on.astronaut_end.x)
 
         self._hud.add_bank_money(self._astronaut.get_trip_money())
+        self._astronaut.set_money_saved(self._astronaut.get_trip_money())
         self._astronaut.set_trip_money(0.0)
-        self._hud.set_trip_money(0.0)
-        self._astronaut = None
 
     def update(self, *args, **kwargs) -> None:
         """

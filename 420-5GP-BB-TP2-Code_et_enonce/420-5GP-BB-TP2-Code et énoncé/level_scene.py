@@ -115,7 +115,17 @@ class LevelScene(Scene):
                     self._astronaut = None
                     self._last_taxied_astronaut_time = time.time()
             elif self._taxi.hit_astronaut(self._astronaut):
-                self._retry_current_astronaut()
+                if self._astronaut.get_arrived_target():
+                    money_lost = self._astronaut.get_money_saved() / 2
+                    self._astronaut.set_money_saved(0.0)
+                    #self._hud.set_trip_money(0.0)
+                    self._hud.add_bank_money(- money_lost)
+                    self._astronaut = None
+                    if self._nb_taxied_astronauts < len(self._astronauts) - 1:
+                        self._nb_taxied_astronauts += 1
+                        self._last_taxied_astronaut_time = time.time()
+                else:
+                    self._retry_current_astronaut()
             elif self._taxi.pad_landed_on:
                 if self._taxi.pad_landed_on.number == self._astronaut.source_pad.number:
                     if self._astronaut.is_waiting_for_taxi():
