@@ -284,6 +284,8 @@ class Taxi(pygame.sprite.Sprite):
 
         self._combine_reactor_mask()
 
+        self._consume_fuel()
+
     def _combine_reactor_mask(self) -> None:
         facing = self._flags & Taxi._FLAG_LEFT
 
@@ -330,7 +332,7 @@ class Taxi(pygame.sprite.Sprite):
             self._flags |= Taxi._FLAG_TOP_REACTOR
             self._acceleration.y = min(self._acceleration.y + Taxi._TOP_REACTOR_POWER, Taxi._MAX_ACCELERATION_Y_DOWN)
 
-        elif keys[pygame.K_UP] and not gear_out:
+        elif keys[pygame.K_UP]:
             self._flags &= ~Taxi._FLAG_TOP_REACTOR
             self._flags |= Taxi._FLAG_BOTTOM_REACTOR
             self._acceleration.y = max(self._acceleration.y - Taxi._BOTTOM_REACTOR_POWER, -Taxi._MAX_ACCELERATION_Y_UP)
@@ -359,6 +361,29 @@ class Taxi(pygame.sprite.Sprite):
 
         self._astronaut = None
         self._hud.set_trip_money(0.0)
+        self._hud.reset_fuel()
+
+    def _consume_fuel(self):
+        """
+            Consomme du carburant basé sur les réacteurs actifs.
+        """
+        total_consumption = 0.0
+        if self._flags & Taxi._FLAG_TOP_REACTOR:
+            total_consumption += Taxi._TOP_REACTOR_POWER * 50
+
+        if self._flags & Taxi._FLAG_BOTTOM_REACTOR:
+            total_consumption += Taxi._BOTTOM_REACTOR_POWER * 50
+
+        if self._flags & Taxi._FLAG_REAR_REACTOR:
+            total_consumption += Taxi._REAR_REACTOR_POWER * 50
+
+        if total_consumption > 0.0:
+            self._hud.consume_fuel(total_consumption)
+
+        if self._hud.get_current_fuel() <= 0.0:
+            self._flags = Taxi._FLAG_DESTROYED
+            self._velocity.x = 0.0
+            self._acceleration = pygame.Vector2(0.0, Taxi._CRASH_ACCELERATION)
 
     def _select_image(self) -> None:
         """ Sélectionne l'image et le masque à utiliser pour l'affichage du taxi en fonction de son état. """
@@ -533,3 +558,5 @@ class Taxi(pygame.sprite.Sprite):
         masks[ImgSelector.DESTROYED] = pygame.mask.from_surface(surface), pygame.mask.from_surface(flipped)
 
         return surfaces, masks
+
+
