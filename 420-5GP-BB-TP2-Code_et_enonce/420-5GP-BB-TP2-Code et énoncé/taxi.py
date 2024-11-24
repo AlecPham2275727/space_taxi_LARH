@@ -211,7 +211,7 @@ class Taxi(pygame.sprite.Sprite):
             self.rect.bottom = pad.rect.top + 4
             self._position.y = float(self.rect.y)
             self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
-            self._velocity = self._acceleration =pygame.Vector2(0.0)
+            self._velocity.x = self._velocity.y = self._acceleration.x = self._acceleration.y = 0.0
             self._pad_landed_on = pad
             if self._astronaut and self._astronaut.target_pad.number == pad.number:
                 self.unboard_astronaut()
