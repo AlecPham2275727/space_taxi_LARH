@@ -113,6 +113,10 @@ class HUD:
         self._current_fuel = self._max_fuel
         self.update_fuel_level()
 
+    def add_fuel(self, amount: float) -> None:
+        self._current_fuel = min(self._current_fuel + amount, self._max_fuel)
+        self.update_fuel_level()
+
     def consume_fuel(self, total_consumption):
         self._current_fuel -= total_consumption
         self.update_fuel_level()

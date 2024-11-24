@@ -155,7 +155,8 @@ class LevelScene(Scene):
             if self._taxi.crash_on_pump(pump):
                 self._hud.loose_live()
             elif self._taxi.refuel_from(pump):
-                pass  # introduire les effets secondaires de remplissage de réservoir ici
+                self._hud.add_fuel(0.1)
+
 
     def render(self, screen: pygame.Surface) -> None:
         """
