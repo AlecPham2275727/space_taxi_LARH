@@ -14,7 +14,7 @@ class SplashScene(Scene):
         super().__init__()
         self._surface = pygame.image.load("img/splash.png").convert_alpha()
         self._music = pygame.mixer.Sound("snd/371516__mrthenoronha__space-game-theme-loop.wav")
-        self._music.play(loops=-1, fade_ms=1000)
+        self._music.play(loops=-1, fade_ms=1500)  # Charger la musique en même temps que l'écran noir
 
         # Police pour le texte
         self.font = pygame.font.Font("fonts/BoomBox2.ttf", 24)
@@ -60,6 +60,13 @@ class SplashScene(Scene):
         text_surface.set_alpha(self.text_alpha)
         text_rect = text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() - 100))
         screen.blit(text_surface, text_rect)
+
+        # Appliquer le fondu entrant
+        if self._fade_in_alpha > 0:
+            fade_surface = pygame.Surface(screen.get_size())
+            fade_surface.fill((0, 0, 0))
+            fade_surface.set_alpha(self._fade_in_alpha)
+            screen.blit(fade_surface, (0, 0))
 
     def surface(self) -> pygame.Surface:
         return self._surface
