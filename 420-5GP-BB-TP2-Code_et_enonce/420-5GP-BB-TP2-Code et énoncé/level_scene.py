@@ -62,14 +62,12 @@ class LevelScene(Scene):
         self._hud.visible = True
 
     def determinate_objectives(self):
-        objectives = (
-            [(self._pads[3], self._pads[0]),
-             (self._pads[2], self._pads[4]),
-             (self._pads[0], self._pads[1]),
-             (self._pads[4], self._pads[2]),
-             (self._pads[1], self._pads[3]),
-             (self._pads[0], Pad.UP, self._gate)]
-        )
+        objectives = [
+            (self._pads[astronaut["source_pad"]],
+            Pad.UP if astronaut["destination_pad"] == "UP" else self._pads[astronaut["destination_pad"]],
+             self._gate if astronaut["destination_pad"] == "UP" else None)
+        for astronaut in self._level_config["astronauts"]]
+
         return objectives
 
     def handle_event(self, event: pygame.event.Event) -> None:
@@ -197,7 +195,11 @@ class LevelScene(Scene):
         self._hud.reset()
 
     def spawn_astronaut(self, index) -> Astronaut:
+        print("hello",self._objectives)
+        print(index)
         objectives = self._objectives[index]
+        print(objectives)
+
         if index == len(self._objectives)-1:
             return Astronaut(objectives[0], objectives[1], objectives[2])
         else:
@@ -206,15 +208,6 @@ class LevelScene(Scene):
     def _retry_current_astronaut(self) -> None:
         """ Replace le niveau dans l'état où il était avant la course actuelle. """
         self._gate.close()
-
-        self._astronauts = [
-            Astronaut(
-                self._pads[astronaut["source_pad"]],
-                Pad.UP if astronaut["destination_pad"] == "UP" else self._pads[astronaut["destination_pad"]],
-                astronaut["trip_money"]
-            )
-            for astronaut in self._level_config["astronauts"]
-        ]
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None
 
