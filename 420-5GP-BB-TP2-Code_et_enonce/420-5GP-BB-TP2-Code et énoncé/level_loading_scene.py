@@ -23,6 +23,12 @@ class LevelLoadingScene(Scene):
                 self._fade_out_start_time = pygame.time.get_ticks()
                 SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION)
 
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 1:
+                self._fade_out_start_time = pygame.time.get_ticks()
+                SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION)
+
+
     def update(self) -> None:
         if not self._music_started:
             self._music.play()

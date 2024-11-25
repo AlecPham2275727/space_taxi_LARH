@@ -13,6 +13,7 @@ from hud import HUD
 from obstacle import Obstacle
 from pad import Pad
 from pump import Pump
+from input_settings import InputSettings
 
 
 class ImgSelector(Enum):
@@ -28,6 +29,11 @@ class ImgSelector(Enum):
     GEAR_OUT_AND_BOTTOM_REACTOR = auto()
     DESTROYED = auto()
 
+class InputSelector(Enum):
+    LEFT = auto()
+    RIGHT = auto()
+    UP = auto()
+    DOWN = auto()
 
 class Taxi(pygame.sprite.Sprite):
     """ Un taxi spatial. """
@@ -68,6 +74,8 @@ class Taxi(pygame.sprite.Sprite):
         self._initial_pos = pos
 
         self._hud = HUD()
+
+        self._joystick = InputSettings().joystick
 
         self._reactor_sound = pygame.mixer.Sound("snd/170278__knova__jetpack-low.wav")
         self._reactor_sound.set_volume(0)
@@ -145,6 +153,16 @@ class Taxi(pygame.sprite.Sprite):
                         self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_REAR_REACTOR)
 
                     self._flags ^= Taxi._FLAG_GEAR_OUT  # flip le bit pour refléter le nouvel état
+
+                    self._select_image()
+
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 1:
+                if self._pad_landed_on is None:
+                    if self._flags & Taxi._FLAG_GEAR_OUT != Taxi._FLAG_GEAR_OUT:
+                        self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_REAR_REACTOR)
+
+                    self._flags ^= Taxi._FLAG_GEAR_OUT
 
                     self._select_image()
 
@@ -249,7 +267,8 @@ class Taxi(pygame.sprite.Sprite):
         """
 
         # ÉTAPE 1 - gérer les touches présentement enfoncées
-        self._handle_keys()
+        input_detected = self._detect_input()
+        self._handle_input_action(input_detected)
 
         # ÉTAPE 2 - calculer la nouvelle position du taxi
         self._velocity.x += self._acceleration.x
@@ -297,21 +316,48 @@ class Taxi(pygame.sprite.Sprite):
 
         self.mask_taxi_reactor = mask_with_reactor
 
+    def _detect_input(self) -> InputSelector:
+        input_value = None
+        keys = pygame.key.get_pressed()
 
-    def _handle_keys(self) -> None:
+        if self._joystick:
+            x_axis = self._joystick.get_axis(0) 
+            y_axis = self._joystick.get_axis(4) 
+
+            if x_axis < -0.5: 
+                input_value = InputSelector.LEFT
+            elif x_axis > 0.5: 
+                input_value = InputSelector.RIGHT
+            elif y_axis > 0.5:  
+                input_value = InputSelector.DOWN
+            elif y_axis < -0.5: 
+                input_value = InputSelector.UP
+
+        if keys[pygame.K_LEFT]:
+            input_value = InputSelector.LEFT
+        elif keys[pygame.K_RIGHT]:
+            input_value = InputSelector.RIGHT
+        elif keys[pygame.K_DOWN]:
+            input_value = InputSelector.DOWN
+        elif keys[pygame.K_UP]:
+            input_value = InputSelector.UP
+
+        if input_value is not None:
+            return input_value
+
+
+    def _handle_input_action(self, action: InputSelector) -> None:
         """ Change ou non l'état du taxi en fonction des touches présentement enfoncées. """
         if self._flags & Taxi._FLAG_DESTROYED == Taxi._FLAG_DESTROYED:
             return
 
-        keys = pygame.key.get_pressed()
-
         gear_out = self._flags & Taxi._FLAG_GEAR_OUT == Taxi._FLAG_GEAR_OUT
 
-        if keys[pygame.K_LEFT] and not gear_out:
+        if action == InputSelector.LEFT and not gear_out:
             self._flags |= Taxi._FLAG_LEFT | Taxi._FLAG_REAR_REACTOR
             self._acceleration.x = max(self._acceleration.x - Taxi._REAR_REACTOR_POWER, -Taxi._MAX_ACCELERATION_X)
 
-        elif keys[pygame.K_RIGHT] and not gear_out:
+        elif action == InputSelector.RIGHT and not gear_out:
             self._flags &= ~Taxi._FLAG_LEFT
             self._flags |= self._FLAG_REAR_REACTOR
             self._acceleration.x = min(self._acceleration.x + Taxi._REAR_REACTOR_POWER, Taxi._MAX_ACCELERATION_X)
@@ -320,12 +366,12 @@ class Taxi(pygame.sprite.Sprite):
             self._flags &= ~Taxi._FLAG_REAR_REACTOR
             self._acceleration.x = 0.0
 
-        if keys[pygame.K_DOWN] and not gear_out:
+        if action == InputSelector.DOWN and not gear_out:
             self._flags &= ~Taxi._FLAG_BOTTOM_REACTOR
             self._flags |= Taxi._FLAG_TOP_REACTOR
             self._acceleration.y = min(self._acceleration.y + Taxi._TOP_REACTOR_POWER, Taxi._MAX_ACCELERATION_Y_DOWN)
 
-        elif keys[pygame.K_UP]:
+        elif action == InputSelector.UP:
             self._flags &= ~Taxi._FLAG_TOP_REACTOR
             self._flags |= Taxi._FLAG_BOTTOM_REACTOR
             self._acceleration.y = max(self._acceleration.y - Taxi._BOTTOM_REACTOR_POWER, -Taxi._MAX_ACCELERATION_Y_UP)

@@ -31,6 +31,12 @@ class SplashScene(Scene):
             if event.key in (pygame.K_RETURN, pygame.K_SPACE):
                 self._fade_out_start_time = pygame.time.get_ticks()
                 SceneManager().change_scene("level1_load", SplashScene._FADE_OUT_DURATION)
+        
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 9:
+                self._fade_out_start_time = pygame.time.get_ticks()
+                SceneManager().change_scene("level1_load", SplashScene._FADE_OUT_DURATION)
+
 
     def update(self) -> None:
         if self._fade_out_start_time:
