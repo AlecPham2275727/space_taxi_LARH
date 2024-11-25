@@ -105,8 +105,9 @@ class Taxi(pygame.sprite.Sprite):
             if self.mask.overlap(object.mask, (object.rect.x - self.rect.x, object.rect.y - self.rect.y)):
                 self._flags = self._FLAG_DESTROYED
                 self._crash_sound.play()
-                self._velocity.x = 0.0
-                self._acceleration = pygame.Vector2(0.0, Taxi._CRASH_ACCELERATION)
+                self._velocity = pygame.Vector2(0.0)
+                self._acceleration.y = Taxi._CRASH_ACCELERATION
+                self._acceleration.x = 0.0
                 return True
 
         return False
