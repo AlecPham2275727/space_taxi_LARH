@@ -32,6 +32,7 @@ class ImgSelector(Enum):
 class Taxi(pygame.sprite.Sprite):
     """ Un taxi spatial. """
 
+
     _TAXIS_FILENAME = "img/taxis.png"
     _NB_TAXI_IMAGES = 6
 
@@ -41,6 +42,8 @@ class Taxi(pygame.sprite.Sprite):
     _FLAG_REAR_REACTOR = 1 << 3  # indique si le réacteur arrière est allumé
     _FLAG_GEAR_OUT = 1 << 4  # indique si le train d'atterrissage est sorti
     _FLAG_DESTROYED = 1 << 5  # indique si le taxi est détruit
+    _FLAG_GEAR_SHOCKS = 1 << 6 # indique si le train d'atterrissage est compressé
+
 
     _REACTOR_SOUND_VOLUME = 0.25
 
@@ -53,6 +56,7 @@ class Taxi(pygame.sprite.Sprite):
     _MAX_ACCELERATION_Y_DOWN = 0.05
 
     _MAX_VELOCITY_SMOOTH_LANDING = 0.50  # vitesse maximale permise pour un atterrissage en douceur
+    _MAX_VELOCITY_ROUGH_LANDING = 2.00
     _CRASH_ACCELERATION = 0.10
 
     _FRICTION_MUL = 0.9995  # la vitesse horizontale est multipliée par la friction
@@ -79,6 +83,8 @@ class Taxi(pygame.sprite.Sprite):
         self._surfaces, self._masks = Taxi._load_and_build_surfaces()
 
         self._reinitialize()
+
+        self._start_compressed_gear_time = 0
 
     @property
     def pad_landed_on(self) -> Pad or None:
@@ -191,21 +197,29 @@ class Taxi(pygame.sprite.Sprite):
         :param pad: plateforme pour laquelle vérifier
         :return: True si le taxi est atterri, False sinon
         """
-        gear_out = self._flags & Taxi._FLAG_GEAR_OUT == Taxi._FLAG_GEAR_OUT
+        gear_out = (self._flags & Taxi._FLAG_GEAR_OUT) == Taxi._FLAG_GEAR_OUT
         if not gear_out:
             return False
 
-
-        if self._velocity.y > Taxi._MAX_VELOCITY_SMOOTH_LANDING or self._velocity.y < 0.0:#self._acceleration_y < 0.0:
+        if self._velocity.y > Taxi._MAX_VELOCITY_ROUGH_LANDING or self._velocity.y < 0.0:  # self._acceleration_y < 0.0:
             return False
 
         if not self.rect.colliderect(pad.rect):
             return False
 
         if pygame.sprite.collide_mask(self, pad):
+            print(f"Vitesse verticale lors de l'atterrissage: {self._velocity.y}")
+
+            if self._MAX_VELOCITY_SMOOTH_LANDING < self._velocity.y <= self._MAX_VELOCITY_ROUGH_LANDING:
+                self._flags &= ~Taxi._FLAG_GEAR_OUT
+                self._flags |= Taxi._FLAG_GEAR_SHOCKS
+                self._start_compressed_gear_time = pygame.time.get_ticks()
+
+            elif self._velocity.y <= self._MAX_VELOCITY_SMOOTH_LANDING:
+                #self._flags &= ~self._FLAG_GEAR_SHOCKS
+                self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
 
             self.rect.bottom = pad.rect.top + 4
-            self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
             self._position.y = float(self.rect.y)
             self._velocity.y = self._acceleration.y = self._acceleration.x = 0.0
             self._sliding = True
@@ -281,6 +295,14 @@ class Taxi(pygame.sprite.Sprite):
             self._reactor_sound.set_volume(Taxi._REACTOR_SOUND_VOLUME)
         else:
             self._reactor_sound.set_volume(0)
+
+        if self._flags & Taxi._FLAG_GEAR_SHOCKS:
+            elapsed_time = pygame.time.get_ticks() - self._start_compressed_gear_time
+            print(f"Temps écoulé pour le rough landing: {elapsed_time} ms")
+            if elapsed_time >= 500:
+                self._flags &= ~Taxi._FLAG_GEAR_SHOCKS
+                self._flags |= Taxi._FLAG_GEAR_OUT
+                print("Fin du rough landing.")
 
         # ÉTAPE 4 - sélectionner la bonne image en fonction de l'état du taxi
         self._select_image()
@@ -368,6 +390,7 @@ class Taxi(pygame.sprite.Sprite):
 
         self._astronaut = None
         self._sliding = False
+        self._start_compressed_gear_time = 0
         self._hud.set_trip_money(0.0)
         self._hud.reset_fuel()
 
@@ -443,6 +466,11 @@ class Taxi(pygame.sprite.Sprite):
         if self._flags & Taxi._FLAG_DESTROYED:
             self.image = self._surfaces[ImgSelector.DESTROYED][facing]
             self.mask = self._masks[ImgSelector.DESTROYED][facing]
+            return
+
+        if self._flags & Taxi._FLAG_GEAR_SHOCKS:
+            self.image = self._surfaces[ImgSelector.GEAR_SHOCKS][facing]
+            self.mask = self._masks[ImgSelector.GEAR_SHOCKS][facing]
             return
 
         self.image = self._surfaces[ImgSelector.IDLE][facing]
