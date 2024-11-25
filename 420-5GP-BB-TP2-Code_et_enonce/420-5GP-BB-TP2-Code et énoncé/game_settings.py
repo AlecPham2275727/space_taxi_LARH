@@ -38,3 +38,6 @@ class GameSettings:
             self.screen = None
             self.pad_font = pygame.font.Font(GameSettings.GAME_FONT, 11)
             self._initialized = True
+
+    def get_level_configuration(self, level: int) -> str:
+        return  f"level{level}.cfg"

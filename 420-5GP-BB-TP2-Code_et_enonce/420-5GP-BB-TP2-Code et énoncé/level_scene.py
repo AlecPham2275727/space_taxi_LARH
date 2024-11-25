@@ -30,8 +30,8 @@ class LevelScene(Scene):
         super().__init__()
         self._settings = GameSettings()
         self._level = level
-        config_file = f"level{self._level}.cfg" #À revoir
-        self._level_config = self._load_level_config(config_file)
+        self._config_file = self._settings.get_level_configuration(self._level)
+        self._level_config = self._load_level_config(self._config_file)
         self._surface = pygame.image.load(self._level_config["surface"])
         self._music = pygame.mixer.Sound(self._settings.MAIN_SOUNDTRACK)
         self._music = pygame.mixer.Sound(self._level_config["music"])
