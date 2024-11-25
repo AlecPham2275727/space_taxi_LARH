@@ -133,7 +133,7 @@ class LevelScene(Scene):
                     # self._hud.set_trip_money(0.0)
                     self._hud.add_bank_money(- money_lost)
                     self._astronaut = None
-                    if self._nb_taxied_astronauts < len(self._astronauts) - 1:
+                    if self._nb_taxied_astronauts < len(self._objectives) - 1:
                         self._nb_taxied_astronauts += 1
                         self._last_taxied_astronaut_time = time.time()
                 else:

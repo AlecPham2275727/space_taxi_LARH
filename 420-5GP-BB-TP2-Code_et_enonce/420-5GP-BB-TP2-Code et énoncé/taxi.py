@@ -56,8 +56,9 @@ class Taxi(pygame.sprite.Sprite):
     _CRASH_ACCELERATION = 0.10
 
     _FRICTION_MUL = 0.9995  # la vitesse horizontale est multipliée par la friction
+    _FRICTION_PAD = 0.9395
     _GRAVITY_ADD = 0.005  # la gravité est ajoutée à la vitesse verticale
-
+    #_GRAVITY_ADD = 0.0
     def __init__(self, pos: tuple) -> None:
         """
         Initialise une instance de taxi.
@@ -194,6 +195,7 @@ class Taxi(pygame.sprite.Sprite):
         if not gear_out:
             return False
 
+
         if self._velocity.y > Taxi._MAX_VELOCITY_SMOOTH_LANDING or self._velocity.y < 0.0:#self._acceleration_y < 0.0:
             return False
 
@@ -201,10 +203,13 @@ class Taxi(pygame.sprite.Sprite):
             return False
 
         if pygame.sprite.collide_mask(self, pad):
+
             self.rect.bottom = pad.rect.top + 4
-            self._position.y = float(self.rect.y)
             self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
-            self._velocity.x = self._velocity.y = self._acceleration.x = self._acceleration.y = 0.0
+            self._position.y = float(self.rect.y)
+            self._velocity.y = self._acceleration.y = self._acceleration.x = 0.0
+            self._sliding = True
+
             self._pad_landed_on = pad
             if self._astronaut and self._astronaut.target_pad.number == pad.number:
                 self.unboard_astronaut()
@@ -259,11 +264,16 @@ class Taxi(pygame.sprite.Sprite):
         if self._pad_landed_on is None:
             self._velocity.y += Taxi._GRAVITY_ADD
 
-
         self._position += self._velocity
 
         self.rect.x = round(self._position.x)
         self.rect.y = round(self._position.y)
+
+        if self._pad_landed_on and self._sliding:
+            self._velocity.x *= self._FRICTION_PAD
+            if self._velocity.x < 0.1:
+                self._sliding = False
+                self._velocity.x = 0
 
         # ÉTAPE 3 - fait entendre les réacteurs ou pas
         reactor_flags = Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_REAR_REACTOR | Taxi._FLAG_BOTTOM_REACTOR
@@ -278,6 +288,9 @@ class Taxi(pygame.sprite.Sprite):
         self._combine_reactor_mask()
 
         self._consume_fuel()
+
+
+
 
     def _combine_reactor_mask(self) -> None:
         facing = self._flags & Taxi._FLAG_LEFT
@@ -336,6 +349,7 @@ class Taxi(pygame.sprite.Sprite):
             self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_BOTTOM_REACTOR)
             self._acceleration.y = 0.0
 
+
     def _reinitialize(self) -> None:
         """ Initialise (ou réinitialise) les attributs de l'instance. """
         self._flags = 0
@@ -353,6 +367,7 @@ class Taxi(pygame.sprite.Sprite):
         self._taking_off = False
 
         self._astronaut = None
+        self._sliding = False
         self._hud.set_trip_money(0.0)
         self._hud.reset_fuel()
 
