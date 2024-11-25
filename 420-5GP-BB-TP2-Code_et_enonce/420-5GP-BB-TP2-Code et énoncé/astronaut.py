@@ -89,8 +89,8 @@ class Astronaut(pygame.sprite.Sprite):
             target = (self._gate.rect.x, self._gate.rect.y)
         else:
             target = (self._target_pad.rect.x, self._target_pad.rect.y)
-        trip_price = math.sqrt(((target[0] - origin[0]) ** 2) + ((target[1] - origin[1]) ** 2))
-        return round(trip_price)/4
+        trip_price = ((target[0] - origin[0]) ** 2) + ((target[1] - origin[1]) ** 2)
+        return round(trip_price)/10
 
     @property
     def source_pad(self) -> Pad:
