@@ -133,7 +133,6 @@ class LevelScene(Scene):
                     self._last_taxied_astronaut_time = time.time()
             elif self._taxi.hit_astronaut(self._astronaut):
                 self._astronaut.scream_in_agony()
-                self._retry_current_astronaut()
                 if self._astronaut.get_arrived_target():
                     money_lost = self._astronaut.get_money_saved() / 2
                     self._astronaut.set_money_saved(0.0)
