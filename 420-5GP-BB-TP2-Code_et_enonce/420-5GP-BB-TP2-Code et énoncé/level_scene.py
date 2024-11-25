@@ -83,6 +83,10 @@ class LevelScene(Scene):
                 self._taxi.reset()
                 self._retry_current_astronaut()
                 return
+        
+        if self._astronaut:
+            if self._taxi.is_destroyed() and self._astronaut.is_onboard():
+                self._astronaut.reset_trip_money()
 
         if self._taxi:
             self._taxi.handle_event(event)
@@ -127,6 +131,7 @@ class LevelScene(Scene):
                     self._astronaut = None
                     self._last_taxied_astronaut_time = time.time()
             elif self._taxi.hit_astronaut(self._astronaut):
+                self._astronaut.scream_in_agony()
                 self._retry_current_astronaut()
             elif self._taxi.pad_landed_on:
                 if self._taxi.pad_landed_on.number == self._astronaut.source_pad.number:

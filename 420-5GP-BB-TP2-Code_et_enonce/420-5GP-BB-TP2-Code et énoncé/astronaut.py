@@ -109,6 +109,14 @@ class Astronaut(pygame.sprite.Sprite):
 
     def has_reached_destination(self) -> bool:
         return self._state == AstronautState.REACHED_DESTINATION
+    
+    def reset_trip_money(self) -> None:
+        self._time_is_money = 0.0
+        self._trip_money = 0.0
+    
+    def scream_in_agony(self) -> None:
+        clip = random.choice(self._hey_clips)
+        clip.play()
 
     def is_jumping_on_starting_pad(self) -> bool:
         """

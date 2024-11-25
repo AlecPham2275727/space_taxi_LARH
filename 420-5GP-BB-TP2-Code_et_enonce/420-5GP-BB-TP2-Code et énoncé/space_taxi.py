@@ -35,6 +35,14 @@ def main() -> None:
     screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
     pygame.display.set_caption("Tribute to Space Taxi!")
 
+    # Ajouter l'icône personnalisée
+    try:
+        # Source du code : https://stackoverflow.com/questions/21271059/how-do-i-change-the-pygame-icon
+        icon = pygame.image.load("img/splash2.png")
+        pygame.display.set_icon(icon)
+    except pygame.error as e:
+        print(f"Erreur lors du chargement de l'icône : {e}")
+
     clock = pygame.time.Clock()
 
     show_fps = False
