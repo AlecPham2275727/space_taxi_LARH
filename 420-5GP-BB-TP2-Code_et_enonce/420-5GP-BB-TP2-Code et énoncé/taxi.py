@@ -14,6 +14,7 @@ from obstacle import Obstacle
 from pad import Pad
 from pump import Pump
 from input_settings import InputSettings
+from game_settings import GameSettings
 
 
 class ImgSelector(Enum):
@@ -38,7 +39,6 @@ class InputSelector(Enum):
 class Taxi(pygame.sprite.Sprite):
     """ Un taxi spatial. """
 
-    _TAXIS_FILENAME = "img/taxis.png"
     _NB_TAXI_IMAGES = 6
 
     _FLAG_LEFT = 1 << 0  # indique si le taxi va vers la gauche
@@ -70,6 +70,7 @@ class Taxi(pygame.sprite.Sprite):
         :param pos:
         """
         super(Taxi, self).__init__()
+        self._settings = GameSettings()
 
         self._initial_pos = pos
 
@@ -77,11 +78,11 @@ class Taxi(pygame.sprite.Sprite):
 
         self._joystick = InputSettings().joystick
 
-        self._reactor_sound = pygame.mixer.Sound("snd/170278__knova__jetpack-low.wav")
+        self._reactor_sound = pygame.mixer.Sound(self._settings.REACTOR_SOUND)
         self._reactor_sound.set_volume(0)
         self._reactor_sound.play(-1)
 
-        self._crash_sound = pygame.mixer.Sound("snd/237375__squareal__car-crash.wav")
+        self._crash_sound = pygame.mixer.Sound(self._settings.CRASH_SOUND)
 
         self._surfaces, self._masks = Taxi._load_and_build_surfaces()
 
@@ -490,7 +491,7 @@ class Taxi(pygame.sprite.Sprite):
         """
         surfaces = {}
         masks = {}
-        sprite_sheet = pygame.image.load(Taxi._TAXIS_FILENAME).convert_alpha()
+        sprite_sheet = pygame.image.load(GameSettings.TAXIS_FILENAME).convert_alpha()
         sheet_width = sprite_sheet.get_width()
         sheet_height = sprite_sheet.get_height()
 

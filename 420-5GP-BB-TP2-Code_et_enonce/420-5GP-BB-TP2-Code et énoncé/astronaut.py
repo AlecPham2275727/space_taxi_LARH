@@ -7,6 +7,7 @@ import time
 from enum import Enum, auto
 from pad import Pad
 from gate import Gate
+from game_settings import GameSettings
 
 
 class AstronautState(Enum):
@@ -22,7 +23,6 @@ class AstronautState(Enum):
 class Astronaut(pygame.sprite.Sprite):
     """ Un astronaute. """
 
-    _ASTRONAUT_FILENAME = "img/astronaut.png"
     _NB_WAITING_IMAGES = 1
     _NB_WAVING_IMAGES = 4
     _NB_JUMPING_IMAGES = 6
@@ -46,7 +46,6 @@ class Astronaut(pygame.sprite.Sprite):
         :param trip_money: le montant de départ pour la course (diminue avec le temps)
         """
         super(Astronaut, self).__init__()
-
         self._gate = gate
         self._source_pad = source_pad
         self._target_pad = target_pad
@@ -277,7 +276,7 @@ class Astronaut(pygame.sprite.Sprite):
                      - une liste de trames (image, masque) pour se déplacer vers la droite
         """
         nb_images = Astronaut._NB_WAITING_IMAGES + Astronaut._NB_WAVING_IMAGES + Astronaut._NB_JUMPING_IMAGES
-        sprite_sheet = pygame.image.load(Astronaut._ASTRONAUT_FILENAME).convert_alpha()
+        sprite_sheet = pygame.image.load(GameSettings.ASTRONAUT_FILENAME).convert_alpha()
         sheet_width = sprite_sheet.get_width()
         sheet_height = sprite_sheet.get_height()
         image_size = (sheet_width / nb_images, sheet_height)

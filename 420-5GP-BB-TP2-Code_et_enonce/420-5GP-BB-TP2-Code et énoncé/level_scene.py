@@ -28,17 +28,16 @@ class LevelScene(Scene):
         :param level: le numéro de niveau
         """
         super().__init__()
-
+        self._settings = GameSettings()
         self._level = level
-        config_file = f"level{self._level}.cfg"
+        config_file = f"level{self._level}.cfg" #À revoir
         self._level_config = self._load_level_config(config_file)
         self._surface = pygame.image.load(self._level_config["surface"])
-        self._music = pygame.mixer.Sound("snd/476556__magmisoundtracks__sci-fi-music-loop-01.wav")
+        self._music = pygame.mixer.Sound(self._settings.MAIN_SOUNDTRACK)
         self._music = pygame.mixer.Sound(self._level_config["music"])
         self._music_started = False
         self._fade_out_start_time = None
 
-        self._settings = GameSettings()
         self._hud = HUD()
 
         self._taxi = Taxi(tuple(self._level_config["taxi_position"]))

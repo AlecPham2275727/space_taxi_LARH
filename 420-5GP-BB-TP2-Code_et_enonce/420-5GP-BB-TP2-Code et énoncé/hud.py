@@ -6,10 +6,7 @@ from game_settings import GameSettings
 class HUD:
     """ Singleton pour l'affichage tête haute (HUD). """
 
-    _LIVES_ICONS_FILENAME = "img/hud_lives.png"
     _LIVES_ICONS_SPACING = 10
-    _FUEL_GAUGE_FULL_FILENAME = "img/fuel_gauge_full.png"
-    _FUEL_GAUGE_EMPTY_FILENAME = "img/fuel_gauge_empty.png"
 
     _instance = None
 
@@ -22,8 +19,8 @@ class HUD:
         if not hasattr(self, '_initialized'):
             self._settings = GameSettings()
 
-            self._money_font = pygame.font.Font("fonts/boombox2.ttf", 24)
-            self._fuel_font = pygame.font.Font("fonts/boombox2.ttf", 10)
+            self._money_font = pygame.font.Font(self._settings.GAME_FONT, 24)
+            self._fuel_font = pygame.font.Font(self._settings.GAME_FONT, 10)
 
             self._bank_money = 0
             self._bank_money_surface = self._render_bank_money_surface()
@@ -33,11 +30,11 @@ class HUD:
             self._trip_money_surface = self._render_trip_money_surface()
 
             self._lives = self._settings.NB_PLAYER_LIVES
-            self._lives_icon = pygame.image.load(HUD._LIVES_ICONS_FILENAME).convert_alpha()
+            self._lives_icon = pygame.image.load(self._settings.LIVES_ICONS_FILENAME).convert_alpha()
             self._lives_pos= pygame.Vector2(20, self._settings.SCREEN_HEIGHT - (self._lives_icon.get_height() + 40))
 
-            self._fuel_gauge_full = pygame.image.load(HUD._FUEL_GAUGE_FULL_FILENAME).convert_alpha()
-            self._fuel_gauge_empty = pygame.image.load(HUD._FUEL_GAUGE_EMPTY_FILENAME).convert_alpha()
+            self._fuel_gauge_full = pygame.image.load(self._settings.FUEL_GAUGE_FULL_FILENAME).convert_alpha()
+            self._fuel_gauge_empty = pygame.image.load(self._settings.FUEL_GAUGE_EMPTY_FILENAME).convert_alpha()
             self._fuel_gauge_width = self._fuel_gauge_full.get_width()
             self._fuel_gauge_height = self._fuel_gauge_full.get_height()
 

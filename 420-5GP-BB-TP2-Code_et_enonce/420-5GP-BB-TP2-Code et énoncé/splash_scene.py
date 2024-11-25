@@ -2,6 +2,7 @@ import pygame
 
 from scene import Scene
 from scene_manager import SceneManager
+from game_settings import GameSettings
 
 
 class SplashScene(Scene):
@@ -12,12 +13,13 @@ class SplashScene(Scene):
 
     def __init__(self) -> None:
         super().__init__()
-        self._surface = pygame.image.load("img/splash.png").convert_alpha()
-        self._music = pygame.mixer.Sound("snd/371516__mrthenoronha__space-game-theme-loop.wav")
+        self._settings = GameSettings()
+        self._surface = pygame.image.load(self._settings.SPLASH_IMAGE).convert_alpha()
+        self._music = pygame.mixer.Sound(self._settings.SPLASH_AUDIO)
         self._music.play(loops=-1, fade_ms=1500)  # Charger la musique en même temps que l'écran noir
 
         # Police pour le texte
-        self.font = pygame.font.Font("fonts/BoomBox2.ttf", 24)
+        self.font = pygame.font.Font(self._settings.GAME_FONT, 24)
         self.text_alpha = 255
         self.alpha_direction = -5
 
