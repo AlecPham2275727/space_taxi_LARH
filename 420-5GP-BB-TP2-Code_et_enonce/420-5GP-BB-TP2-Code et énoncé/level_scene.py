@@ -77,6 +77,12 @@ class LevelScene(Scene):
                 self._taxi.reset()
                 self._retry_current_astronaut()
                 return
+            
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 1 and self._taxi.is_destroyed():
+                self._taxi.reset()
+                self._retry_current_astronaut()
+                return
 
         if self._astronaut:
             if self._taxi.is_destroyed() and self._astronaut.is_onboard():

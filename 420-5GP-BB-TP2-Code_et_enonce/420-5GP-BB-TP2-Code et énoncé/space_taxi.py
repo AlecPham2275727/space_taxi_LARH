@@ -24,6 +24,7 @@ from level_loading_scene import LevelLoadingScene
 from level_scene import LevelScene
 from scene_manager import SceneManager
 from splash_scene import SplashScene
+from input_settings import InputSettings
 
 
 def main() -> None:
@@ -31,7 +32,9 @@ def main() -> None:
     pygame.init()
     pygame.mixer.init()
 
+    pygame.joystick.init()
     settings = GameSettings()
+    input_settings = InputSettings()
     screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
     pygame.display.set_caption("Tribute to Space Taxi!")
 
@@ -66,6 +69,7 @@ def main() -> None:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit_game()
+
                 scene_manager.handle_event(event)
 
             scene_manager.update()
