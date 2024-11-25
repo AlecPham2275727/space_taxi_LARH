@@ -7,6 +7,7 @@ from scene_manager import SceneManager
 class SplashScene(Scene):
     """ Scène titre (splash). """
 
+    _FADE_IN_DURATION: int = 1500
     _FADE_OUT_DURATION: int = 1500  # ms
 
     def __init__(self) -> None:
@@ -19,6 +20,9 @@ class SplashScene(Scene):
         self.font = pygame.font.Font("fonts/BoomBox2.ttf", 24)
         self.text_alpha = 255
         self.alpha_direction = -5
+
+        self._fade_in_start_time = pygame.time.get_ticks()
+        self._fade_in_alpha = 255
 
         self._fade_out_start_time = None
 
@@ -35,6 +39,13 @@ class SplashScene(Scene):
             self._music.set_volume(volume)
             if volume == 0:
                 self._fade_out_start_time = None
+
+        current_time = pygame.time.get_ticks()
+
+        # Mettre à jour le fondu noir
+        if self._fade_in_alpha > 0:
+            elapsed_time = current_time - self._fade_in_start_time
+            self._fade_in_alpha = max(0, 255 - int((elapsed_time / SplashScene._FADE_IN_DURATION) * 255))
 
         # Mise à jour de la transparence pour le clignotement
         self.text_alpha += self.alpha_direction
