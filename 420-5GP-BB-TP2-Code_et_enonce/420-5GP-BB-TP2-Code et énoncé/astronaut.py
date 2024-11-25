@@ -80,6 +80,7 @@ class Astronaut(pygame.sprite.Sprite):
         self._state_time = 0  # temps écoulé dans l'état actuel
         self._current_frame = 0
         self._last_frame_time = time.time()
+        self._arrived_pad_target = False
 
     def calculate_trip_price(self):
         origin = (self.source_pad.rect.x, self.source_pad.rect.y)
@@ -106,6 +107,18 @@ class Astronaut(pygame.sprite.Sprite):
 
     def get_trip_money(self) -> float:
         return self._trip_money
+
+    def get_money_saved(self) -> float:
+        return self._money_saved
+
+    def set_money_saved(self, money_saved: float) -> None:
+        self._money_saved = money_saved
+
+    def set_arrived_target(self, arrived: bool) -> bool:
+        self._arrived_pad_target = arrived
+
+    def get_arrived_target(self) -> bool:
+        return self._arrived_pad_target
 
     def has_reached_destination(self) -> bool:
         return self._state == AstronautState.REACHED_DESTINATION
@@ -137,6 +150,7 @@ class Astronaut(pygame.sprite.Sprite):
 
     def is_onboard(self) -> bool:
         return self._state == AstronautState.ONBOARD
+
 
     def is_waiting_for_taxi(self) -> bool:
         return self._state in (AstronautState.WAITING, AstronautState.WAVING)

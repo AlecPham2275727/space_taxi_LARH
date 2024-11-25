@@ -83,7 +83,7 @@ class LevelScene(Scene):
                 self._taxi.reset()
                 self._retry_current_astronaut()
                 return
-        
+
         if self._astronaut:
             if self._taxi.is_destroyed() and self._astronaut.is_onboard():
                 self._astronaut.reset_trip_money()
@@ -94,6 +94,7 @@ class LevelScene(Scene):
     def update(self) -> None:
         """
         Met à jour le niveau de jeu. Cette méthode est appelée à chaque itération de la boucle de jeu.
+        :param delta_time: temps écoulé (en secondes) depuis la dernière trame affichée
         """
         if not self._music_started:
             self._music.play(-1)
@@ -133,10 +134,21 @@ class LevelScene(Scene):
             elif self._taxi.hit_astronaut(self._astronaut):
                 self._astronaut.scream_in_agony()
                 self._retry_current_astronaut()
+                if self._astronaut.get_arrived_target():
+                    money_lost = self._astronaut.get_money_saved() / 2
+                    self._astronaut.set_money_saved(0.0)
+                    # self._hud.set_trip_money(0.0)
+                    self._hud.add_bank_money(- money_lost)
+                    self._astronaut = None
+                    if self._nb_taxied_astronauts < len(self._astronauts) - 1:
+                        self._nb_taxied_astronauts += 1
+                        self._last_taxied_astronaut_time = time.time()
+                else:
+                    self._retry_current_astronaut()
             elif self._taxi.pad_landed_on:
                 if self._taxi.pad_landed_on.number == self._astronaut.source_pad.number:
                     if self._astronaut.is_waiting_for_taxi():
-                        self._astronaut.jump(self._taxi.rect.x+20)
+                        self._astronaut.jump(self._taxi.rect.x + 20)
             elif self._astronaut.is_jumping_on_starting_pad():
                 self._astronaut.wait()
         else:
@@ -162,7 +174,7 @@ class LevelScene(Scene):
             if self._taxi.crash_on_pump(pump):
                 self._hud.loose_live()
             elif self._taxi.refuel_from(pump):
-                pass  # introduire les effets secondaires de remplissage de réservoir ici
+                self._hud.add_fuel(0.1)
 
     def render(self, screen: pygame.Surface) -> None:
         """
