@@ -61,6 +61,13 @@ class SplashScene(Scene):
         text_rect = text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() - 100))
         screen.blit(text_surface, text_rect)
 
+        # Appliquer le fondu entrant
+        if self._fade_in_alpha > 0:
+            fade_surface = pygame.Surface(screen.get_size())
+            fade_surface.fill((0, 0, 0))
+            fade_surface.set_alpha(self._fade_in_alpha)
+            screen.blit(fade_surface, (0, 0))
+
     def surface(self) -> pygame.Surface:
         return self._surface
 
