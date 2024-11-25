@@ -37,6 +37,7 @@ def main() -> None:
 
     # Ajouter l'icône personnalisée
     try:
+        # Source du code : https://stackoverflow.com/questions/21271059/how-do-i-change-the-pygame-icon
         icon = pygame.image.load("img/splash2.png")
         pygame.display.set_icon(icon)
     except pygame.error as e:
