@@ -1,5 +1,7 @@
 import pygame
 import time
+import json
+import os
 
 from astronaut import Astronaut
 from game_settings import GameSettings
@@ -28,36 +30,30 @@ class LevelScene(Scene):
         super().__init__()
 
         self._level = level
-        self._surface = pygame.image.load("img/space01.png").convert_alpha()
+        config_file = f"level{self._level}.cfg"
+        self._level_config = self._load_level_config(config_file)
+        self._surface = pygame.image.load(self._level_config["surface"])
         self._music = pygame.mixer.Sound("snd/476556__magmisoundtracks__sci-fi-music-loop-01.wav")
+        self._music = pygame.mixer.Sound(self._level_config["music"])
         self._music_started = False
         self._fade_out_start_time = None
 
         self._settings = GameSettings()
         self._hud = HUD()
 
-        self._taxi = Taxi((self._settings.SCREEN_WIDTH / 2, self._settings.SCREEN_HEIGHT / 2))
+        self._taxi = Taxi(tuple(self._level_config["taxi_position"]))
 
-        self._gate = Gate("img/gate.png", (582, 3))
+        self._gate = Gate(self._level_config["gate"]["image"], self._level_config["gate"]["position"])
 
-        self._obstacles = [Obstacle("img/south01.png", (0, self._settings.SCREEN_HEIGHT - 141)),
-                           Obstacle("img/west01.png", (0, 0)),
-                           Obstacle("img/east01.png", (self._settings.SCREEN_WIDTH - 99, 0)),
-                           Obstacle("img/north01.png", (0, 0)),
-                           Obstacle("img/obstacle01.png", (840, 150)),
-                           Obstacle("img/obstacle02.png", (250, 200))]
+        self._obstacles = [Obstacle(obstacle["image"], tuple(obstacle["position"])) for obstacle in self._level_config["obstacles"]]
         self._obstacle_sprites = pygame.sprite.Group()
         self._obstacle_sprites.add(self._obstacles)
 
-        self._pumps = [Pump("img/pump.png", (305, 335))]
+        self._pumps = [Pump(pump["image"],tuple(pump["position"])) for pump in self._level_config["pumps"]]
         self._pump_sprites = pygame.sprite.Group()
         self._pump_sprites.add(self._pumps)
 
-        self._pads = [Pad(1, "img/pad01.png", (650, self._settings.SCREEN_HEIGHT - 68), 5, 5),
-                      Pad(2, "img/pad02.png", (510, 205), 90, 15),
-                      Pad(3, "img/pad03.png", (150, 360), 10, 10),
-                      Pad(4, "img/pad04.png", (670, 480), 30, 280),
-                      Pad(5, "img/pad05.png", (1040, 380), 30, 120)]
+        self._pads = [Pad(pad["number"], pad["image"], tuple(pad["position"]), pad["astronaut_start_x"], pad["astronaut_end_x"]) for pad in self._level_config["pads"]]
         self._pad_sprites = pygame.sprite.Group()
         self._pad_sprites.add(self._pads)
 
@@ -186,11 +182,31 @@ class LevelScene(Scene):
     def _retry_current_astronaut(self) -> None:
         """ Replace le niveau dans l'état où il était avant la course actuelle. """
         self._gate.close()
-        self._astronauts = [Astronaut(self._pads[3], self._pads[0], 20.00),
-                            Astronaut(self._pads[2], self._pads[4], 20.00),
-                            Astronaut(self._pads[0], self._pads[1], 20.00),
-                            Astronaut(self._pads[4], self._pads[2], 20.00),
-                            Astronaut(self._pads[1], self._pads[3], 20.00),
-                            Astronaut(self._pads[0], Pad.UP, 20.00)]
+
+        self._astronauts = [
+            Astronaut(
+                self._pads[astronaut["source_pad"]],
+                Pad.UP if astronaut["destination_pad"] == "UP" else self._pads[astronaut["destination_pad"]],
+                astronaut["trip_money"]
+            )
+            for astronaut in self._level_config["astronauts"]
+        ]
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None
+
+#source :
+#https://opensource.com/article/21/6/what-config-files
+#https://www.geeksforgeeks.org/read-json-file-using-python/
+    def _load_level_config(self, config_file: str) -> dict:
+        """ Charge la configuration du niveau depuis un fichier JSON et la retourne.
+            :param config_file: chemin vers le fichier de configuration
+            :return: dictionnaire contenant la configuration du niveau
+     """
+        if not os.path.exists(config_file):
+            raise FileNotFoundError(f"Le fichier de configuration {config_file} est introuvable.")
+
+        with open(config_file, 'r') as file:
+            level_config = json.load(file)
+
+        return level_config
+
