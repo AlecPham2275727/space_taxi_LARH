@@ -25,6 +25,7 @@ class GameSettings:
     TAXIS_FILENAME = "img/taxis.png"
     REACTOR_SOUND = "snd/170278__knova__jetpack-low.wav"
     CRASH_SOUND = "snd/237375__squareal__car-crash.wav"
+    SMOOTH_LANDING_SOUND = "snd/8-bit-heaven-26287-[AudioTrimmer.com].wav"
 
     _instance = None
 

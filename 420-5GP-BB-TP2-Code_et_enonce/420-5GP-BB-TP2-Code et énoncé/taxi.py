@@ -87,6 +87,7 @@ class Taxi(pygame.sprite.Sprite):
         self._reactor_sound.play(-1)
 
         self._crash_sound = pygame.mixer.Sound(self._settings.CRASH_SOUND)
+        self._smooth_landing_sound = pygame.mixer.Sound(self._settings.SMOOTH_LANDING_SOUND)
 
         self._surfaces, self._masks = Taxi._load_and_build_surfaces()
 
@@ -235,6 +236,8 @@ class Taxi(pygame.sprite.Sprite):
 
             elif self._velocity.y <= self._MAX_VELOCITY_SMOOTH_LANDING:
                 #self._flags &= ~self._FLAG_GEAR_SHOCKS
+                print("PLAYING SOUND")
+                self._smooth_landing_sound.play()
                 self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
 
             self.rect.bottom = pad.rect.top + 4
