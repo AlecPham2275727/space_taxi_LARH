@@ -6,7 +6,6 @@
 
 ### Références
 #### Code insipirer pour faire l'animation du texte: "Pad 3 please!"
- //coroutine qui joue l'animation du début
     private IEnumerator JouerAnimationDebut()
     {
         float startTime = Time.time;//temps qu'on commence l'animation
