@@ -8,6 +8,7 @@ from enum import Enum, auto
 from pad import Pad
 from gate import Gate
 from game_settings import GameSettings
+from hud import HUD
 
 
 class AstronautState(Enum):
@@ -49,6 +50,8 @@ class Astronaut(pygame.sprite.Sprite):
         self._gate = gate
         self._source_pad = source_pad
         self._target_pad = target_pad
+
+        self._hud = HUD()
 
         self._trip_money = self.calculate_trip_price()
         self._time_is_money = 0.0
@@ -238,6 +241,7 @@ class Astronaut(pygame.sprite.Sprite):
                         self._pad_please_clips[0].play()
                     else:
                         self._pad_please_clips[self._target_pad.number].play()
+                        self._hud.display_pad_destination(self.target_pad.number)
 
                 return
 

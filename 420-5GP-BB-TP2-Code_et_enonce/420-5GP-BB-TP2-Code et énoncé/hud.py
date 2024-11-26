@@ -1,4 +1,6 @@
 import pygame
+import threading
+import time
 
 from game_settings import GameSettings
 
@@ -7,6 +9,9 @@ class HUD:
     """ Singleton pour l'affichage tête haute (HUD). """
 
     _LIVES_ICONS_SPACING = 10
+    _TEXT_FADE_IN_DURATION = 250
+    _TEXT_FADE_OUT_DURATION = 500
+    _OPAQUE_TEXT_DURATION = 1750
 
     _instance = None
 
@@ -19,8 +24,11 @@ class HUD:
         if not hasattr(self, '_initialized'):
             self._settings = GameSettings()
 
+            self._center_screen = self._settings.SCREEN_WIDTH // 2, self._settings.SCREEN_HEIGHT // 2
+
             self._money_font = pygame.font.Font(self._settings.GAME_FONT, 24)
             self._fuel_font = pygame.font.Font(self._settings.GAME_FONT, 10)
+            self._destination_font = pygame.font.Font(self._settings.GAME_FONT, 30)
 
             self._bank_money = 0
             self._bank_money_surface = self._render_bank_money_surface()
@@ -38,6 +46,11 @@ class HUD:
             self._fuel_gauge_width = self._fuel_gauge_full.get_width()
             self._fuel_gauge_height = self._fuel_gauge_full.get_height()
 
+            self._destination_text_thread = None
+            self._destination_text_displayed_time = None
+            self._destination_text_alpha = 0
+            self._destination_text = None
+
             self._fuel_gauge_pos = pygame.Vector2(
                 (self._settings.SCREEN_WIDTH - self._fuel_gauge_width) / 2,
                 self._settings.SCREEN_HEIGHT - self._fuel_gauge_height - 3
@@ -52,6 +65,7 @@ class HUD:
             self._initialized = True
 
     def render(self, screen: pygame.Surface) -> None:
+        self._screen = screen
         spacing = self._lives_icon.get_width() + HUD._LIVES_ICONS_SPACING
         for n in range(self._lives):
             screen.blit(self._lives_icon, (self._lives_pos.x + (n * spacing), self._lives_pos.y))
@@ -76,6 +90,7 @@ class HUD:
         #source : https://www.reddit.com/r/pygame/comments/qw7fmk/how_to_set_center_position_of_text/?rdt=60642
         text_rect = fuel_text.get_rect(center=(center_x, center_y))
         screen.blit(fuel_text, text_rect)
+
 
     def add_bank_money(self, amount: float) -> None:
         self._bank_money += round(amount, 2)
@@ -125,5 +140,46 @@ class HUD:
     def _render_trip_money_surface(self) -> pygame.Surface:
         money_str = f"{self._trip_money:.2f}"
         return self._money_font.render(f"${money_str: >5}", True, (51, 51, 51))
+    
+    def display_pad_destination(self, target_pad: int) -> None:
+        if self._destination_text_thread is None:
+            self._destination_text_thread = threading.Thread(target=self._handle_text_display, args=(target_pad, ))
+            self._destination_text_displayed_time = pygame.time.get_ticks()
+            self._destination_text_thread.start()
+
+    def _handle_text_display(self, target_pad: int) -> None:
+        # The following code was inspired by a previous work in a school project: please go see the Read.me
+        self._destination_text = f"Pad {target_pad} please!"
+        total_duration = self._TEXT_FADE_IN_DURATION + self._OPAQUE_TEXT_DURATION +  self._TEXT_FADE_OUT_DURATION
+        
+        while pygame.time.get_ticks() - self._destination_text_displayed_time < total_duration:
+            elapsed_time = pygame.time.get_ticks() - self._destination_text_displayed_time
+
+            if elapsed_time < self._TEXT_FADE_IN_DURATION:
+                self._destination_text_alpha = int(255 * (elapsed_time / self._TEXT_FADE_IN_DURATION))
+            elif elapsed_time < self._TEXT_FADE_IN_DURATION + self._OPAQUE_TEXT_DURATION:
+                self._destination_text_alpha = 255
+            elif elapsed_time < total_duration:
+                self._destination_text_alpha = int(255 - 255 * (elapsed_time / total_duration))
+
+            self._update_text_opacity()
+            time.sleep(0.0001)
+
+        self._destination_text = None  
+        self._destination_text_displayed_time = None
+        self._destination_text_thread = None 
+    
+    def _update_text_opacity(self) -> None:
+         # Source: https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
+        displayed_destination_text = self._destination_font.render(self._destination_text, True, (255, 255, 255))
+        displayed_destination_text.set_alpha(self._destination_text_alpha) 
+        destination_text_rect = displayed_destination_text.get_rect(center=self._center_screen)
+        self._screen.blit(displayed_destination_text, destination_text_rect)
+    
+
+
+       
+
+
 
 
