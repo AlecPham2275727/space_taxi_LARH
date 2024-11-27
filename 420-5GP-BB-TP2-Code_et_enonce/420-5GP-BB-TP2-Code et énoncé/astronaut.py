@@ -19,6 +19,8 @@ class AstronautState(Enum):
     JUMPING_LEFT = auto()
     ONBOARD = auto()
     REACHED_DESTINATION = auto()
+    APPEAR = auto()
+    DISAPPEAR = auto()
 
 
 class Astronaut(pygame.sprite.Sprite):
@@ -38,7 +40,9 @@ class Astronaut(pygame.sprite.Sprite):
     _FRAME_TIMES = {AstronautState.WAITING: 0.1,
                     AstronautState.WAVING: 0.1,
                     AstronautState.JUMPING_LEFT: 0.15,
-                    AstronautState.JUMPING_RIGHT: 0.15}
+                    AstronautState.JUMPING_RIGHT: 0.15,
+                    AstronautState.APPEAR: 0.05,
+                    AstronautState.DISAPPEAR: 0.05}
 
     def __init__(self, source_pad: Pad, target_pad: Pad, gate: Gate = None) -> None:
         """
@@ -60,12 +64,14 @@ class Astronaut(pygame.sprite.Sprite):
 
         self._hey_taxi_clips, self._pad_please_clips, self._hey_clips = Astronaut._load_clips()
 
-        waiting_frames, waving_frames, jumping_left_frames, jumping_right_frames = Astronaut._load_and_build_frames()
-
+        (waiting_frames, waving_frames, jumping_left_frames, jumping_right_frames, appear_frames,
+         disappear_frames) = Astronaut._load_and_build_frames()
         self._all_frames = {AstronautState.WAITING: waiting_frames,
                             AstronautState.WAVING: waving_frames,
                             AstronautState.JUMPING_LEFT: jumping_left_frames,
-                            AstronautState.JUMPING_RIGHT: jumping_right_frames}
+                            AstronautState.JUMPING_RIGHT: jumping_right_frames,
+                            AstronautState.APPEAR: appear_frames,
+                            AstronautState.DISAPPEAR: disappear_frames}
 
         self.image, self.mask = self._all_frames[AstronautState.WAITING][0]
         self.rect = self.image.get_rect()
@@ -78,7 +84,8 @@ class Astronaut(pygame.sprite.Sprite):
 
         self._waving_delay = 0  # temps avant d'envoyer la main (0 initialement, aléatoire ensuite)
 
-        self._state = AstronautState.WAITING
+        self._state = AstronautState.APPEAR
+        # self._state = AstronautState.WAITING
         self._frames = self._all_frames[self._state]
         self._state_time = 0  # temps écoulé dans l'état actuel
         self._current_frame = 0
@@ -222,6 +229,9 @@ class Astronaut(pygame.sprite.Sprite):
 
         # ÉTAPE 3 - changer d'état si le moment est venu
         self._state_time += current_time - self._last_frame_time
+        if (self._state == AstronautState.APPEAR and self._state_time >= self._FRAME_TIMES[AstronautState.APPEAR] *
+                len(self._frames)):
+            self.change_state(AstronautState.WAITING)
         if self._state == AstronautState.WAITING:
             if self._state_time >= self._waving_delay:
                 self._call_taxi()
@@ -279,6 +289,7 @@ class Astronaut(pygame.sprite.Sprite):
                      - une liste de trames (image, masque) pour envoyer la main
                      - une liste de trames (image, masque) pour se déplacer vers la gauche
                      - une liste de trames (image, masque) pour se déplacer vers la droite
+                     - une liste de trames (image, masque) pour se téléporter
         """
         nb_images = (Astronaut._NB_WAITING_IMAGES + Astronaut._NB_WAVING_IMAGES + Astronaut._NB_JUMPING_IMAGES +
                      Astronaut._NB_TELEPORT_IMAGES)
@@ -332,7 +343,25 @@ class Astronaut(pygame.sprite.Sprite):
             flipped_mask = pygame.mask.from_surface(flipped_surface)
             jumping_left_frames.append((flipped_surface, flipped_mask))
 
-        return waiting_frames, waving_frames, jumping_left_frames, jumping_right_frames
+        # astronaute qui se téléporte
+
+        teleport_frames = []
+        appear_frames = []
+        first_frame = Astronaut._NB_WAITING_IMAGES + Astronaut._NB_WAVING_IMAGES + Astronaut._NB_JUMPING_IMAGES + 1
+        for frame in range(first_frame, first_frame + Astronaut._NB_TELEPORT_IMAGES - 1):
+            surface = pygame.Surface(image_size, flags=pygame.SRCALPHA)
+            source_rect = surface.get_rect()
+            source_rect.x = frame * source_rect.width
+            surface.blit(sprite_sheet, (0, 0), source_rect)
+            mask = pygame.mask.from_surface(surface)
+            teleport_frames.append((surface, mask))
+
+        for i in range(int(len(teleport_frames)/2)):
+            chosen_frame = teleport_frames[random.randint(i*2, i*2+1)]
+            appear_frames.append(chosen_frame)
+
+        return (waiting_frames, waving_frames, jumping_left_frames, jumping_right_frames, appear_frames,
+                appear_frames.reverse())
 
     @staticmethod
     def _load_clips() -> tuple:

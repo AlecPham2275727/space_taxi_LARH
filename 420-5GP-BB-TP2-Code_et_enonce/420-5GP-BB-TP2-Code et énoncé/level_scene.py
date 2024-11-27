@@ -200,10 +200,7 @@ class LevelScene(Scene):
         self._hud.reset()
 
     def spawn_astronaut(self, index) -> Astronaut:
-        print("hello",self._objectives)
-        print(index)
         objectives = self._objectives[index]
-        print(objectives)
 
         if index == len(self._objectives)-1:
             return Astronaut(objectives[0], objectives[1], objectives[2])
