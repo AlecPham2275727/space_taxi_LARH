@@ -10,6 +10,7 @@ class Pad(pygame.sprite.Sprite):
 
     _TEXT_COLOR = (255, 255, 255)
     _HEIGHT = 40
+    _PAD_IN_MEMORY = {}
 
     def __init__(self, number: int, filename: str, pos: tuple, astronaut_start_x: int, astronaut_end_x: int) -> None:
         """
@@ -25,7 +26,7 @@ class Pad(pygame.sprite.Sprite):
         self._label_text_offset = None
         self._label_background_offset = None
         self.number = number
-        self.image = pygame.image.load(filename).convert_alpha()
+        self.image = self._load_pad_from_memory(filename)
         self.mask = pygame.mask.from_surface(self.image)
 
         font = GameSettings().pad_font
@@ -52,6 +53,16 @@ class Pad(pygame.sprite.Sprite):
 
         self.astronaut_start = pygame.Vector2(self.rect.x + astronaut_start_x, self.rect.y - 24)
         self.astronaut_end = pygame.Vector2(self.rect.x + astronaut_end_x, self.rect.y - 24)
+
+
+    def _load_pad_from_memory(self, filename: str) -> None:
+        if filename in Pad._PAD_IN_MEMORY:
+            return self._PAD_IN_MEMORY[filename]
+        else:
+            new_pad_image = pygame.image.load(filename).convert_alpha()
+            self._PAD_IN_MEMORY[filename] = new_pad_image
+            return new_pad_image
+        
 
     def center_label(self, text_width: int, background_width: int, divisor: float):
         self._label_text_offset = ((self.image.get_width() - text_width) / divisor + 1, 3)

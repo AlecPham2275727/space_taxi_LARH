@@ -25,6 +25,7 @@ from level_scene import LevelScene
 from scene_manager import SceneManager
 from splash_scene import SplashScene
 from game_over_scene import GameOverScene
+from input_settings import InputSettings
 
 
 def main() -> None:
@@ -32,14 +33,16 @@ def main() -> None:
     pygame.init()
     pygame.mixer.init()
 
+    pygame.joystick.init()
     settings = GameSettings()
+    input_settings = InputSettings()
     screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
     pygame.display.set_caption("Tribute to Space Taxi!")
 
     # Ajouter l'icône personnalisée
     try:
         # Source du code : https://stackoverflow.com/questions/21271059/how-do-i-change-the-pygame-icon
-        icon = pygame.image.load("img/space_taxi_icon.ico")
+        icon = pygame.image.load(settings.SPACE_TAXI_ICON)
         pygame.display.set_icon(icon)
     except pygame.error as e:
         print(f"Erreur lors du chargement de l'icône : {e}")
@@ -68,6 +71,7 @@ def main() -> None:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit_game()
+
                 scene_manager.handle_event(event)
 
             scene_manager.update()
