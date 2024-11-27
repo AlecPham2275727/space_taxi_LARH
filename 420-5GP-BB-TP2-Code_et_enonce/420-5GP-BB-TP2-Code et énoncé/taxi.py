@@ -108,7 +108,7 @@ class Taxi(pygame.sprite.Sprite):
         :param obstacle: obstacle avec lequel vérifier
         :return: True si le taxi est en contact avec l'obstacle, False sinon
         """
-        self._crash_on_level_objects(obstacle)
+        return self._crash_on_level_objects(obstacle)
 
     def _crash_on_level_objects(self, object: pygame.sprite.Sprite) -> bool:
         if not isinstance(object, (Pump, Pad, Obstacle)):
@@ -136,7 +136,7 @@ class Taxi(pygame.sprite.Sprite):
         :param pad: plateforme avec laquelle vérifier
         :return: True si le taxi est en contact avec la plateforme, False sinon
         """
-        self._crash_on_level_objects(pad)
+        return self._crash_on_level_objects(pad)
         
 
     def crash_on_pump(self, pump: Pump) -> bool:
@@ -145,7 +145,7 @@ class Taxi(pygame.sprite.Sprite):
         :param pump: pompe avec laquelle vérifier
         :return: True si le taxi est en contact avec la pompe, False sinon
         """
-        self._crash_on_level_objects(pump)
+        return self._crash_on_level_objects(pump)
 
     def draw(self, surface: pygame.Surface) -> None:
         """ Dessine le taxi sur la surface fournie comme argument. """
