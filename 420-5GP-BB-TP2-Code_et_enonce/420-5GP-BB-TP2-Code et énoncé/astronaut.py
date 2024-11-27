@@ -26,6 +26,7 @@ class Astronaut(pygame.sprite.Sprite):
     _NB_WAITING_IMAGES = 1
     _NB_WAVING_IMAGES = 4
     _NB_JUMPING_IMAGES = 6
+    _NB_TELEPORT_IMAGES = 11
 
     _VELOCITY = 0.2
     _LOOSE_ONE_CENT_EVERY = 0.05  # perd 1 cent tous les 5 centièmes de seconde
@@ -276,7 +277,8 @@ class Astronaut(pygame.sprite.Sprite):
                      - une liste de trames (image, masque) pour se déplacer vers la gauche
                      - une liste de trames (image, masque) pour se déplacer vers la droite
         """
-        nb_images = Astronaut._NB_WAITING_IMAGES + Astronaut._NB_WAVING_IMAGES + Astronaut._NB_JUMPING_IMAGES
+        nb_images = (Astronaut._NB_WAITING_IMAGES + Astronaut._NB_WAVING_IMAGES + Astronaut._NB_JUMPING_IMAGES +
+                     Astronaut._NB_TELEPORT_IMAGES)
         sprite_sheet = pygame.image.load(Astronaut._ASTRONAUT_FILENAME).convert_alpha()
         sheet_width = sprite_sheet.get_width()
         sheet_height = sprite_sheet.get_height()

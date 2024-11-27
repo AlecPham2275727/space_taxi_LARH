@@ -24,6 +24,7 @@ from level_loading_scene import LevelLoadingScene
 from level_scene import LevelScene
 from scene_manager import SceneManager
 from splash_scene import SplashScene
+from game_over_scene import GameOverScene
 
 
 def main() -> None:
@@ -55,6 +56,7 @@ def main() -> None:
     scene_manager.add_scene("level1_load", LevelLoadingScene(1))
     scene_manager.add_scene("level1", LevelScene(1))
     scene_manager.add_scene("level2_load", LevelLoadingScene(2))
+    scene_manager.add_scene("Game_over", GameOverScene())
 
     scene_manager.set_scene("splash")
 
