@@ -40,8 +40,8 @@ class Astronaut(pygame.sprite.Sprite):
                     AstronautState.WAVING: 0.1,
                     AstronautState.JUMPING_LEFT: 0.15,
                     AstronautState.JUMPING_RIGHT: 0.15,
-                    AstronautState.APPEAR: 0.1,
-                    AstronautState.REACHED_DESTINATION: 0.1}
+                    AstronautState.APPEAR: 10,
+                    AstronautState.REACHED_DESTINATION: 10}
 
     def __init__(self, source_pad: Pad, target_pad: Pad, gate: Gate = None) -> None:
         """
@@ -73,7 +73,7 @@ class Astronaut(pygame.sprite.Sprite):
                             AstronautState.APPEAR: appear_frames,
                             AstronautState.REACHED_DESTINATION: disappear_frames}
 
-        self.image, self.mask = self._all_frames[AstronautState.WAITING][0]
+        self.image, self.mask = self._all_frames[AstronautState.APPEAR][0]
         self.rect = self.image.get_rect()
         self.rect.x = self._source_pad.astronaut_start.x
         self.rect.y = self._source_pad.astronaut_start.y
@@ -135,11 +135,11 @@ class Astronaut(pygame.sprite.Sprite):
 
     def has_reached_destination(self) -> bool:
         return self._disappear_animation_finished
-    
+
     def reset_trip_money(self) -> None:
         self._time_is_money = 0.0
         self._trip_money = 0.0
-    
+
     def scream_in_agony(self) -> None:
         clip = random.choice(self._hey_clips)
         clip.play()
@@ -269,6 +269,7 @@ class Astronaut(pygame.sprite.Sprite):
         self._frames = self._all_frames[entered_state]
         self._current_frame = 0
 
+    # refactor
     def wait(self) -> None:
         """ Replace l'astronaute dans l'état d'attente. """
         self._state = AstronautState.WAITING
@@ -359,10 +360,10 @@ class Astronaut(pygame.sprite.Sprite):
             mask = pygame.mask.from_surface(surface)
             teleport_frames.append((surface, mask))
 
-        for i in range(int(len(teleport_frames)/2)):
-            chosen_appear_frame = teleport_frames[random.randint(i*2, i*2+1)]
+        for i in range(int(len(teleport_frames) / 2)):
+            chosen_appear_frame = teleport_frames[random.randint(i * 2, i * 2 + 1)]
             chosen_disappear_frame = teleport_frames[
-                random.randint((len(teleport_frames)-i*2)-2, (len(teleport_frames)-i*2)-1)]
+                random.randint((len(teleport_frames) - i * 2) - 2, (len(teleport_frames) - i * 2) - 1)]
             appear_frames.append(chosen_appear_frame)
             disappear_frames.append(chosen_disappear_frame)
 

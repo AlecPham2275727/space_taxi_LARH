@@ -59,7 +59,7 @@ def main() -> None:
     scene_manager.add_scene("level1_load", LevelLoadingScene(1))
     scene_manager.add_scene("level1", LevelScene(1))
     scene_manager.add_scene("level2_load", LevelLoadingScene(2))
-    scene_manager.add_scene("Game_over", GameOverScene())
+    scene_manager.add_scene("game_over", GameOverScene())
 
     scene_manager.set_scene("splash")
 
