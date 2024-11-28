@@ -83,10 +83,6 @@ class LevelScene(Scene):
                 self._retry_current_astronaut()
                 return
 
-        if self._astronaut:
-            if self._taxi.is_destroyed() and self._astronaut.is_onboard():
-                self._astronaut.reset_trip_money()
-
         if self._taxi:
             self._taxi.handle_event(event)
 
@@ -114,6 +110,8 @@ class LevelScene(Scene):
             self._hud.set_trip_money(self._astronaut.get_trip_money())
 
             if self._astronaut.is_onboard():
+                if self._taxi.is_destroyed():
+                    self._astronaut.reset_trip_money()
                 self._taxi.board_astronaut(self._astronaut)
                 if self._astronaut.target_pad is Pad.UP:
                     if self._gate.is_closed():
