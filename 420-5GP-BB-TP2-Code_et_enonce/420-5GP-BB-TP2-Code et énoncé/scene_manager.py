@@ -31,12 +31,15 @@ class SceneManager:
     def set_scene(self, name: str) -> None:
         self._current_scene = self._scenes.get(name, self._current_scene)
 
-    def change_scene(self, name: str, fade_duration: int = 0) -> None:
+    def change_scene(self, name: str, fade_duration: int = 0, scene: Scene = None) -> None:
         self._next_scene = self._scenes.get(name, self._current_scene)
         self._fade = Fade(self._current_scene, self._next_scene)
         self._current_scene = None
         self._fade.start(fade_duration)
         self._transitioning = True
+
+    def verify_level_scene(self, level: int) -> bool:
+        return self._scenes.get(f"level{level}")
 
     def update(self) -> None:
         if self._current_scene:

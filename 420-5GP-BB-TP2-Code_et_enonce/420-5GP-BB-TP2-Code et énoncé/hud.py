@@ -175,11 +175,3 @@ class HUD:
         displayed_destination_text.set_alpha(self._destination_text_alpha) 
         destination_text_rect = displayed_destination_text.get_rect(center=self._center_screen)
         self._screen.blit(displayed_destination_text, destination_text_rect)
-    
-
-
-       
-
-
-
-

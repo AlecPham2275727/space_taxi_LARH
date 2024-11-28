@@ -29,8 +29,8 @@ class LevelScene(Scene):
         """
         super().__init__()
         self._settings = GameSettings()
-        self._level = level
-        self._config_file = self._settings.get_level_configuration(self._level)
+        self.level = level
+        self._config_file = self._settings.get_level_configuration(self.level)
         self._level_config = self._load_level_config(self._config_file)
         self._surface = pygame.image.load(self._level_config["surface"])
         self._music = pygame.mixer.Sound(self._settings.MAIN_SOUNDTRACK)
@@ -44,15 +44,18 @@ class LevelScene(Scene):
 
         self._gate = Gate(self._level_config["gate"]["image"], self._level_config["gate"]["position"])
 
-        self._obstacles = [Obstacle(obstacle["image"], tuple(obstacle["position"])) for obstacle in self._level_config["obstacles"]]
+        self._obstacles = [Obstacle(obstacle["image"], tuple(obstacle["position"])) for obstacle in
+                           self._level_config["obstacles"]]
         self._obstacle_sprites = pygame.sprite.Group()
         self._obstacle_sprites.add(self._obstacles)
 
-        self._pumps = [Pump(pump["image"],tuple(pump["position"])) for pump in self._level_config["pumps"]]
+        self._pumps = [Pump(pump["image"], tuple(pump["position"])) for pump in self._level_config["pumps"]]
         self._pump_sprites = pygame.sprite.Group()
         self._pump_sprites.add(self._pumps)
 
-        self._pads = [Pad(pad["number"], pad["image"], tuple(pad["position"]), pad["astronaut_start_x"], pad["astronaut_end_x"]) for pad in self._level_config["pads"]]
+        self._pads = [
+            Pad(pad["number"], pad["image"], tuple(pad["position"]), pad["astronaut_start_x"], pad["astronaut_end_x"])
+            for pad in self._level_config["pads"]]
         self._pad_sprites = pygame.sprite.Group()
         self._pad_sprites.add(self._pads)
         self._objectives = self.determinate_objectives()
@@ -60,23 +63,35 @@ class LevelScene(Scene):
         self._reinitialize()
         self._hud.visible = True
 
+        # Son pour le jingle
+        self._jingle_sound = pygame.mixer.Sound(self._settings.JINGLE_SOUND)
+        self._jingle_played = False
+
     def determinate_objectives(self):
         objectives = [
             (self._pads[astronaut["source_pad"]],
-            Pad.UP if astronaut["destination_pad"] == "UP" else self._pads[astronaut["destination_pad"]],
+             Pad.UP if astronaut["destination_pad"] == "UP" else self._pads[astronaut["destination_pad"]],
              self._gate if astronaut["destination_pad"] == "UP" else None)
-        for astronaut in self._level_config["astronauts"]]
+            for astronaut in self._level_config["astronauts"]]
 
         return objectives
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """ Gère les événements PyGame. """
+        duration = 1500
+
+        if event.type == pygame.USEREVENT + 2:  # Événement déclenché à la fin du jingle
+            self._jingle_played = False
+            pygame.time.set_timer(pygame.USEREVENT + 2, 0)
+
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and self._taxi.is_destroyed():
                 self._taxi.reset()
+                self._taxi.lock_movement(duration)
+                self._jingle_played = False
                 self._retry_current_astronaut()
                 return
-            
+
         if event.type == pygame.JOYBUTTONDOWN:
             if event.button == 1 and self._taxi.is_destroyed():
                 self._taxi.reset()
@@ -121,7 +136,7 @@ class LevelScene(Scene):
                         self._taxi.unboard_astronaut()
                         self._taxi = None
                         self._fade_out_start_time = pygame.time.get_ticks()
-                        SceneManager().change_scene(f"level{self._level + 1}_load", LevelScene._FADE_OUT_DURATION)
+                        SceneManager().change_scene(f"level{self.level + 1}_load", LevelScene._FADE_OUT_DURATION)
                         return
             elif self._astronaut.has_reached_destination():
                 if self._nb_taxied_astronauts < len(self._objectives) - 1:
@@ -172,6 +187,17 @@ class LevelScene(Scene):
             elif self._taxi.refuel_from(pump):
                 self._hud.add_fuel(0.1)
 
+        if self._hud.get_lives() <= 0:
+            SceneManager().change_scene("game_over", LevelScene._FADE_OUT_DURATION)
+            
+        # Source : https://www.w3schools.com/python/ref_func_hasattr.asp
+        if not hasattr(self, "_jingle_played") or not self._jingle_played:
+            self._jingle_sound.play()
+            self._taxi.lock_movement(self._jingle_sound.get_length() * 1000)  # Durée en ms
+            self._jingle_played = True
+            self._last_taxied_astronaut_time = time.time() + self._jingle_sound.get_length()  # Retarder l'astronaute
+            return
+
     def render(self, screen: pygame.Surface) -> None:
         """
         Effectue le rendu du niveau pour l'afficher à l'écran.
@@ -200,7 +226,7 @@ class LevelScene(Scene):
     def spawn_astronaut(self, index) -> Astronaut:
         objectives = self._objectives[index]
 
-        if index == len(self._objectives)-1:
+        if index == len(self._objectives) - 1:
             return Astronaut(objectives[0], objectives[1], objectives[2])
         else:
             return Astronaut(objectives[0], objectives[1])
@@ -211,9 +237,9 @@ class LevelScene(Scene):
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None
 
-#source :
-#https://opensource.com/article/21/6/what-config-files
-#https://www.geeksforgeeks.org/read-json-file-using-python/
+    # source :
+    # https://opensource.com/article/21/6/what-config-files
+    # https://www.geeksforgeeks.org/read-json-file-using-python/
     def _load_level_config(self, config_file: str) -> dict:
         """ Charge la configuration du niveau depuis un fichier JSON et la retourne.
             :param config_file: chemin vers le fichier de configuration
@@ -226,4 +252,3 @@ class LevelScene(Scene):
             level_config = json.load(file)
 
         return level_config
-
