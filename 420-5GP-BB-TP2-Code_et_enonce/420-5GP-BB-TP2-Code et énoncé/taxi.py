@@ -95,6 +95,9 @@ class Taxi(pygame.sprite.Sprite):
 
         self._start_compressed_gear_time = 0
 
+        self._movement_locked = False
+        self._unlock_time = 0
+
     @property
     def pad_landed_on(self) -> Pad or None:
         return self._pad_landed_on
@@ -287,6 +290,12 @@ class Taxi(pygame.sprite.Sprite):
         :param args: inutilisé
         :param kwargs: inutilisé
         """
+        # Empêche tout mouvement tant que le verrouillage est actif
+        if self._movement_locked:
+            if pygame.time.get_ticks() >= self._unlock_time:
+                self._movement_locked = False
+            else:
+                return
 
         # ÉTAPE 1 - gérer les touches présentement enfoncées
         input_detected = self._detect_input()
@@ -333,8 +342,10 @@ class Taxi(pygame.sprite.Sprite):
 
         self._consume_fuel()
 
-
-
+    def lock_movement(self, duration):
+        """ Verrouille le mouvement du taxi pendant une durée spécifiée (en millisecondes). """
+        self._movement_locked = True
+        self._unlock_time = pygame.time.get_ticks() + duration
 
     def _combine_reactor_mask(self) -> None:
         facing = self._flags & Taxi._FLAG_LEFT

@@ -60,6 +60,10 @@ class LevelScene(Scene):
         self._reinitialize()
         self._hud.visible = True
 
+        # Son pour le jingle
+        self._jingle_sound = pygame.mixer.Sound(self._settings.JINGLE_SOUND)
+        self._jingle_played = False
+
     def determinate_objectives(self):
         objectives = [
             (self._pads[astronaut["source_pad"]],
@@ -71,9 +75,17 @@ class LevelScene(Scene):
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """ Gère les événements PyGame. """
+        duration = 1500
+
+        if event.type == pygame.USEREVENT + 2:  # Événement déclenché à la fin du jingle
+            self._jingle_played = False
+            pygame.time.set_timer(pygame.USEREVENT + 2, 0)
+
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and self._taxi.is_destroyed():
                 self._taxi.reset()
+                self._taxi.lock_movement(duration)
+                self._jingle_played = False
                 self._retry_current_astronaut()
                 return
             
@@ -174,6 +186,14 @@ class LevelScene(Scene):
             elif self._taxi.refuel_from(pump):
                 self._hud.add_fuel(0.1)
 
+        # Source : https://www.w3schools.com/python/ref_func_hasattr.asp
+        if not hasattr(self, "_jingle_played") or not self._jingle_played:
+            self._jingle_sound.play()
+            self._taxi.lock_movement(self._jingle_sound.get_length() * 1000)  # Durée en ms
+            self._jingle_played = True
+            self._last_taxied_astronaut_time = time.time() + self._jingle_sound.get_length()  # Retarder l'astronaute
+            return
+
     def render(self, screen: pygame.Surface) -> None:
         """
         Effectue le rendu du niveau pour l'afficher à l'écran.
@@ -213,9 +233,9 @@ class LevelScene(Scene):
         self._last_taxied_astronaut_time = time.time()
         self._astronaut = None
 
-#source :
-#https://opensource.com/article/21/6/what-config-files
-#https://www.geeksforgeeks.org/read-json-file-using-python/
+    #source :
+    #https://opensource.com/article/21/6/what-config-files
+    #https://www.geeksforgeeks.org/read-json-file-using-python/
     def _load_level_config(self, config_file: str) -> dict:
         """ Charge la configuration du niveau depuis un fichier JSON et la retourne.
             :param config_file: chemin vers le fichier de configuration
