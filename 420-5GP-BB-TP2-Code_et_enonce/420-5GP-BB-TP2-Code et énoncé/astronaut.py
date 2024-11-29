@@ -40,8 +40,8 @@ class Astronaut(pygame.sprite.Sprite):
                     AstronautState.WAVING: 0.1,
                     AstronautState.JUMPING_LEFT: 0.15,
                     AstronautState.JUMPING_RIGHT: 0.15,
-                    AstronautState.APPEAR: 10,
-                    AstronautState.REACHED_DESTINATION: 10}
+                    AstronautState.APPEAR: 0.2,
+                    AstronautState.REACHED_DESTINATION: 1}
 
     def __init__(self, source_pad: Pad, target_pad: Pad, gate: Gate = None) -> None:
         """
@@ -64,8 +64,8 @@ class Astronaut(pygame.sprite.Sprite):
 
         self._hey_taxi_clips, self._pad_please_clips, self._hey_clips = Astronaut._load_clips()
 
-        (waiting_frames, waving_frames, jumping_left_frames, jumping_right_frames, appear_frames,
-         disappear_frames) = Astronaut._load_and_build_frames()
+        (waiting_frames, waving_frames, jumping_left_frames, jumping_right_frames,
+         disappear_frames, appear_frames) = Astronaut._load_and_build_frames()
         self._all_frames = {AstronautState.WAITING: waiting_frames,
                             AstronautState.WAVING: waving_frames,
                             AstronautState.JUMPING_LEFT: jumping_left_frames,
@@ -221,17 +221,23 @@ class Astronaut(pygame.sprite.Sprite):
             return
 
         # ÉTAPE 2 - changer de trame si le moment est venu
-        if current_time - self._last_frame_time >= Astronaut._FRAME_TIMES[self._state]:
+        frame_change_condition = None
+        if self._state == AstronautState.REACHED_DESTINATION:
+            frame_change_condition = (current_time - self._last_frame_time >=
+                                      Astronaut._FRAME_TIMES[self._state]/len(self._frames))
+        else:
+            frame_change_condition = current_time - self._last_frame_time >= Astronaut._FRAME_TIMES[self._state]
+        if frame_change_condition:
             self._current_frame = (self._current_frame + 1) % len(self._frames)
             self._last_frame_time = current_time
 
         # ÉTAPE 3 - changer d'état si le moment est venu
         self._state_time += current_time - self._last_frame_time
-        if (self._state == AstronautState.APPEAR and self._state_time >= self._FRAME_TIMES[AstronautState.APPEAR] *
-                len(self._frames)):
+        if ((self._state == AstronautState.APPEAR) and
+                (self._state_time >= self._FRAME_TIMES[AstronautState.REACHED_DESTINATION] * len(self._frames))):
             self.change_state(AstronautState.WAITING)
-        elif (self._state == AstronautState.REACHED_DESTINATION and self._state_time >=
-              self._FRAME_TIMES[AstronautState.REACHED_DESTINATION] * len(self._frames)):
+        elif ((self._state == AstronautState.REACHED_DESTINATION) and
+              (self._state_time >= self._FRAME_TIMES[AstronautState.REACHED_DESTINATION] * len(self._frames))):
             self._disappear_animation_finished = True
         elif self._state == AstronautState.WAITING:
             if self._state_time >= self._waving_delay:
@@ -272,10 +278,7 @@ class Astronaut(pygame.sprite.Sprite):
     # refactor
     def wait(self) -> None:
         """ Replace l'astronaute dans l'état d'attente. """
-        self._state = AstronautState.WAITING
-        self._state_time = 0
-        self._frames = self._all_frames[AstronautState.WAITING]
-        self._current_frame = 0
+        self.change_state(AstronautState.WAITING)
 
     def _call_taxi(self) -> None:
         """ Joue le son d'appel du taxi. """
