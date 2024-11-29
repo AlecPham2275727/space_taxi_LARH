@@ -426,6 +426,7 @@ class Taxi(pygame.sprite.Sprite):
         self._start_compressed_gear_time = 0
         self._hud.set_trip_money(0.0)
         self._hud.reset_fuel()
+        self._fuel_ran_out = False
 
     def _consume_fuel(self):
         """
