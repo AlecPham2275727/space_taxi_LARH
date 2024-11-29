@@ -15,6 +15,8 @@
   Novembre 2024
 """
 import os
+import re
+
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 import sys
@@ -24,10 +26,12 @@ from level_loading_scene import LevelLoadingScene
 from level_scene import LevelScene
 from scene_manager import SceneManager
 from splash_scene import SplashScene
+from error_scene import ErrorScene
 from input_settings import InputSettings
 
 
 def main() -> None:
+    scene_manager = SceneManager()
     """ Programme principal. """
     pygame.init()
     pygame.mixer.init()
@@ -53,42 +57,67 @@ def main() -> None:
     if show_fps:
         fps_font = pygame.font.Font(None, 36)
 
-    scene_manager = SceneManager()
-    scene_manager.add_scene("splash", SplashScene())
-    scene_manager.add_scene("level1_load", LevelLoadingScene(1))
-    scene_manager.add_scene("level1", LevelScene(1))
-    scene_manager.add_scene("level2_load", LevelLoadingScene(2))
+    try:
+        scene_manager.add_scene("splash", SplashScene())
+        scene_manager.add_scene("level1_load", LevelLoadingScene(1))
+        scene_manager.add_scene("level1", LevelScene(1))
+        scene_manager.add_scene("level2_load", LevelLoadingScene(2))
+        scene_manager.set_scene("splash")
+    except FileNotFoundError as e:
+        # Source :
+        # https://www.geeksforgeeks.org/python-program-to-get-the-file-name-from-the-file-path/
+        # https://docs.python.org/fr/3/howto/regex.html
+        # Dans le str(e), recherche une chaine qui commence par No file suivie de chaine différentes de ' et finit par '
+        match = re.search(r"No file '([^']+)'", str(e))
+        filename = ""
+        if match:
+            filepath = match.group(1)
+            filename = os.path.basename(filepath)
+        scene_manager.add_scene("error", ErrorScene(filename))
+        scene_manager.set_scene("error")
 
-    scene_manager.set_scene("splash")
 
     try:
         while True:
+            try:
+                clock.tick(settings.FPS) / 1000  # en secondes
 
-            clock.tick(settings.FPS) / 1000  # en secondes
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        quit_game()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    quit_game()
+                    scene_manager.handle_event(event)
 
-                scene_manager.handle_event(event)
+                scene_manager.update()
 
-            scene_manager.update()
+                scene_manager.render(screen)
 
-            scene_manager.render(screen)
+                if show_fps:
+                    fps = clock.get_fps()
+                    fps_text = fps_font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
+                    screen.blit(fps_text, (10, 10))
 
-            if show_fps:
-                fps = clock.get_fps()
-                fps_text = fps_font.render(f"FPS: {int(fps)}", True, (255, 255, 255))
-                screen.blit(fps_text, (10, 10))
+                pygame.display.flip()
 
-            pygame.display.flip()
-
+            except FileNotFoundError as e:
+                #Source :
+                #https://www.geeksforgeeks.org/python-program-to-get-the-file-name-from-the-file-path/
+                #https://docs.python.org/fr/3/howto/regex.html
+                #Dans le str(e), recherche une chaine qui commence par No file suivie de chaine différentes de ' et finit par '
+                match = re.search(r"No file '([^']+)'", str(e))
+                filename = ""
+                if match:
+                    filepath = match.group(1)
+                    filename = os.path.basename(filepath)
+                scene_manager.add_scene("error", ErrorScene(filename))
+                scene_manager.set_scene("error")
     except KeyboardInterrupt:
         quit_game()
 
 
+
+
 def quit_game() -> None:
-    """ Quitte le programme. """
     pygame.mixer.music.stop()
     pygame.quit()
     sys.exit(0)
