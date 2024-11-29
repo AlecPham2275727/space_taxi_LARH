@@ -73,6 +73,7 @@ class Taxi(pygame.sprite.Sprite):
         self._sliding = None
         self._astronaut = None
         self._settings = GameSettings()
+        self._fuel_ran_out = False
 
         self._initial_pos = pos
 
@@ -108,16 +109,16 @@ class Taxi(pygame.sprite.Sprite):
         """
         return self._crash_on_level_objects(obstacle)
 
-    def _crash_on_level_objects(self, crashable_object: pygame.sprite.Sprite) -> bool:
-        if not isinstance(crashable_object, (Pump, Pad, Obstacle)):
+    def _crash_on_level_objects(self, collidable_object: pygame.sprite.Sprite) -> bool:
+        if not isinstance(collidable_object, (Pump, Pad, Obstacle)):
             return False
 
         if self._flags & Taxi._FLAG_DESTROYED == Taxi._FLAG_DESTROYED:
             return False
 
-        if self.rect.colliderect(crashable_object.rect):
-            if self.mask.overlap(crashable_object.mask, (crashable_object.rect.x - self.rect.x, 
-                                                         crashable_object.rect.y - self.rect.y)):
+        if self.rect.colliderect(collidable_object.rect):
+            if self.mask.overlap(collidable_object.mask, (collidable_object.rect.x - self.rect.x,
+                                                          collidable_object.rect.y - self.rect.y)):
                 self._flags = self._FLAG_DESTROYED
                 self._crash_sound.play()
                 self._velocity = pygame.Vector2(0.0)
@@ -324,7 +325,9 @@ class Taxi(pygame.sprite.Sprite):
 
         self._combine_reactor_mask()
 
-        self._consume_fuel()
+        if not self._fuel_ran_out:
+            self._consume_fuel()
+
 
     def _combine_reactor_mask(self) -> None:
         facing = self._flags & Taxi._FLAG_LEFT
@@ -431,6 +434,8 @@ class Taxi(pygame.sprite.Sprite):
             self._flags = Taxi._FLAG_DESTROYED
             self._velocity.x = 0.0
             self._acceleration = pygame.Vector2(0.0, Taxi._CRASH_ACCELERATION)
+            self._hud.loose_live()
+            self._fuel_ran_out = True
 
     def _select_image(self) -> None:
         """ Sélectionne l'image et le masque à utiliser pour l'affichage du taxi en fonction de son état. """

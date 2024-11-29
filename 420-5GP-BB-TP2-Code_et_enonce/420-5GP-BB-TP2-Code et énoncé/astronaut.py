@@ -252,7 +252,6 @@ class Astronaut(pygame.sprite.Sprite):
         elif self._state in (AstronautState.JUMPING_RIGHT, AstronautState.JUMPING_LEFT):
             if self.rect.x == self._target_x:
                 if self._target_pad is not Pad.UP and self._target_x == self._target_pad.astronaut_end.x:
-                    # self._state = AstronautState.REACHED_DESTINATION
                     self.change_state(AstronautState.REACHED_DESTINATION)
                 else:
                     self._state = AstronautState.ONBOARD
