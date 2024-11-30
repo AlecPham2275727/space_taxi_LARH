@@ -255,10 +255,10 @@ class Astronaut(pygame.sprite.Sprite):
                     self.change_state(AstronautState.REACHED_DESTINATION)
                 else:
                     self._state = AstronautState.ONBOARD
+                    self._play_destination_clip()
                     if self._target_pad is None:
                         self._pad_please_clips[0].play()
                     else:
-                        self._pad_please_clips[self._target_pad.number].play()
                         self._hud.display_pad_destination(self.target_pad.number)
 
                 return
@@ -395,3 +395,12 @@ class Astronaut(pygame.sprite.Sprite):
         heys = [pygame.mixer.Sound("voices/gary_hey_01.mp3")]
 
         return hey_taxis, pad_pleases, heys
+
+    def _play_destination_clip(self) -> None:
+        """ Joue un clip audio qui indique la destination. """
+        if self._target_pad is Pad.UP:
+            clip = self._pad_please_clips[0] # Si la destination est "Up"
+        else:
+            pad_number = self._target_pad.number
+            clip = self._pad_please_clips[pad_number]
+        clip.play()
