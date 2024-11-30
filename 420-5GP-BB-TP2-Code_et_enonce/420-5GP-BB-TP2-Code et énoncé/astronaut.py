@@ -43,6 +43,9 @@ class Astronaut(pygame.sprite.Sprite):
                     AstronautState.APPEAR: 0.2,
                     AstronautState.REACHED_DESTINATION: 1}
 
+    _FRAMES = None
+    _AUDIO_CLIPS = None
+
     def __init__(self, source_pad: Pad, target_pad: Pad, gate: Gate = None) -> None:
         """
         Initialise une instance d'astronaute.
@@ -62,6 +65,10 @@ class Astronaut(pygame.sprite.Sprite):
         self._last_saved_time = None
         self._disappear_animation_finished = False
 
+        if Astronaut._FRAMES is None or Astronaut._AUDIO_CLIPS is None:
+            Astronaut._FRAMES, Astronaut._AUDIO_CLIPS = self._load_shared_resources()
+
+        self._all_frames = Astronaut._FRAMES
         self._hey_taxi_clips, self._pad_please_clips, self._hey_clips = Astronaut._load_clips()
 
         (waiting_frames, waving_frames, jumping_left_frames, jumping_right_frames,
@@ -404,3 +411,10 @@ class Astronaut(pygame.sprite.Sprite):
             pad_number = self._target_pad.number
             clip = self._pad_please_clips[pad_number]
         clip.play()
+
+    @staticmethod
+    def _load_shared_resources():
+        """ Charge les ressources partagées par toutes les instances. """
+        frames = Astronaut._load_and_build_frames()
+        audio_clips = Astronaut._load_clips()
+        return frames, audio_clips
