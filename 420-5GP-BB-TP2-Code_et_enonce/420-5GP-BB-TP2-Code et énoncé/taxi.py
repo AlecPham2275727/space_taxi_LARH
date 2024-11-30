@@ -395,7 +395,7 @@ class Taxi(pygame.sprite.Sprite):
             self._acceleration.y = min(self._acceleration.y + Taxi._TOP_REACTOR_POWER, Taxi._MAX_ACCELERATION_Y_DOWN)
 
         elif keys[pygame.K_UP] or y_axis < -0.5:
-            self._flags &= ~Taxi._FLAG_TOP_REACTOR
+            self._flags &= ~Taxi._FLAG_GEAR_OUT # rentrer le train d'atterrissage
             self._flags |= Taxi._FLAG_BOTTOM_REACTOR
             self._acceleration.y = max(self._acceleration.y - Taxi._BOTTOM_REACTOR_POWER, -Taxi._MAX_ACCELERATION_Y_UP)
             if self._pad_landed_on:
