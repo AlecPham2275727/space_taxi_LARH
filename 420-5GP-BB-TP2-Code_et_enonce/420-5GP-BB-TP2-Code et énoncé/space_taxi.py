@@ -60,7 +60,6 @@ def main() -> None:
     try:
         scene_manager.add_scene("splash", SplashScene())
         scene_manager.add_scene("level1_load", LevelLoadingScene(1))
-        scene_manager.add_scene("level1", LevelScene(1))
         scene_manager.add_scene("level2_load", LevelLoadingScene(2))
         scene_manager.set_scene("splash")
     except FileNotFoundError as e:

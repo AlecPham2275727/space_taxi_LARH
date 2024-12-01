@@ -1,5 +1,6 @@
 import pygame
 
+from level_scene import LevelScene
 from scene import Scene
 from scene_manager import SceneManager
 from game_settings import GameSettings
@@ -23,11 +24,13 @@ class LevelLoadingScene(Scene):
         if event.type == pygame.KEYDOWN:
             if event.key in (pygame.K_RETURN, pygame.K_SPACE):
                 self._fade_out_start_time = pygame.time.get_ticks()
+                SceneManager().add_scene(f"level{self._level}", LevelScene(self._level))
                 SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION)
 
         if event.type == pygame.JOYBUTTONDOWN:
             if event.button == 1:
                 self._fade_out_start_time = pygame.time.get_ticks()
+                SceneManager().add_scene(f"level{self._level}", LevelScene(self._level))
                 SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION)
 
 
