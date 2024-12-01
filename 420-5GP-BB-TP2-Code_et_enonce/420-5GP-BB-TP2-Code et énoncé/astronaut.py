@@ -275,6 +275,9 @@ class Astronaut(pygame.sprite.Sprite):
 
         self.image, self.mask = self._frames[self._current_frame]
 
+        if self._state == AstronautState.REACHED_DESTINATION:
+            return
+
     def change_state(self, entered_state):
         self._state = entered_state
         self._state_time = 0
@@ -418,3 +421,10 @@ class Astronaut(pygame.sprite.Sprite):
         frames = Astronaut._load_and_build_frames()
         audio_clips = Astronaut._load_clips()
         return frames, audio_clips
+
+    def stop_animation(self):
+        """ Arrête toute animation et interaction de l'astronaute.self """
+        self._state = AstronautState.REACHED_DESTINATION
+        self._velocity = 0.0
+        self._current_frame = 0
+        print("Animation de l'astronaute arrêtée.")
