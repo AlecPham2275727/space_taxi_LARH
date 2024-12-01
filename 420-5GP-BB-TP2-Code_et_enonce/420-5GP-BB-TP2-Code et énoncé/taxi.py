@@ -244,8 +244,11 @@ class Taxi(pygame.sprite.Sprite):
             self._sliding = True
 
             self._pad_landed_on = pad
-            if self._astronaut and self._astronaut.target_pad.number == pad.number:
-                self.unboard_astronaut()
+            if self._astronaut:
+                if self._astronaut.target_pad == Pad.UP:
+                    print("L'astronaute doit être transporté vers la sortie, non débarqué.")
+                elif self._astronaut.target_pad.number == pad.number:
+                    self.unboard_astronaut()
             return True
 
         return False
