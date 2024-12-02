@@ -27,6 +27,7 @@ class GameSettings:
     CRASH_SOUND = "snd/237375__squareal__car-crash.wav"
     SMOOTH_LANDING_SOUND = "snd/8-bit-heaven-26287-[AudioTrimmer.com].wav"
     JINGLE_SOUND = "snd/petit_jingle_sound.mp3"
+    ROUGH_LANDING_SOUND = "snd/rough_landing_sound.wav"
 
     _instance = None
 

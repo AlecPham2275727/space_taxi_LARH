@@ -87,6 +87,7 @@ class Taxi(pygame.sprite.Sprite):
 
         self._crash_sound = pygame.mixer.Sound(self._settings.CRASH_SOUND)
         self._smooth_landing_sound = pygame.mixer.Sound(self._settings.SMOOTH_LANDING_SOUND)
+        self._rough_landing_sound = pygame.mixer.Sound(self._settings.ROUGH_LANDING_SOUND)
 
         self._surfaces, self._masks = Taxi._load_and_build_surfaces()
 
@@ -226,6 +227,7 @@ class Taxi(pygame.sprite.Sprite):
 
 
         # Définir les zones des pattes
+        # Source : https://www.pygame.org/docs/ref/rect.html
         left_leg_rect = pygame.Rect(self.rect.left, self.rect.bottom - 10, self.rect.width / 4, 10)
         right_leg_rect = pygame.Rect(self.rect.centerx + 13, self.rect.bottom - 10, self.rect.width / 4, 10)
 
@@ -241,6 +243,7 @@ class Taxi(pygame.sprite.Sprite):
             print(f"Vitesse verticale lors de l'atterrissage: {self._velocity.y}")
 
             if self._MAX_VELOCITY_SMOOTH_LANDING < self._velocity.y <= self._MAX_VELOCITY_ROUGH_LANDING:
+                self._rough_landing_sound.play()
                 self._flags &= ~Taxi._FLAG_GEAR_OUT
                 self._flags |= Taxi._FLAG_GEAR_SHOCKS
                 self._start_compressed_gear_time = pygame.time.get_ticks()
