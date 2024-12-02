@@ -410,12 +410,13 @@ class Taxi(pygame.sprite.Sprite):
             return
 
         gear_out = self._flags & Taxi._FLAG_GEAR_OUT == Taxi._FLAG_GEAR_OUT
+        gear_shocks = self._flags & Taxi._FLAG_GEAR_SHOCKS == Taxi._FLAG_GEAR_SHOCKS
 
-        if keys[pygame.K_LEFT] or x_axis < -0.5 and not gear_out:
+        if (keys[pygame.K_LEFT] or x_axis < -0.5) and (not gear_out and not gear_shocks):
             self._flags |= Taxi._FLAG_LEFT | Taxi._FLAG_REAR_REACTOR
             self._acceleration.x = max(self._acceleration.x - Taxi._REAR_REACTOR_POWER, -Taxi._MAX_ACCELERATION_X)
 
-        elif keys[pygame.K_RIGHT] or x_axis > 0.5 and not gear_out:
+        elif (keys[pygame.K_RIGHT] or x_axis > 0.5) and (not gear_out and not gear_shocks):
             self._flags &= ~Taxi._FLAG_LEFT
             self._flags |= self._FLAG_REAR_REACTOR
             self._acceleration.x = min(self._acceleration.x + Taxi._REAR_REACTOR_POWER, Taxi._MAX_ACCELERATION_X)
@@ -424,7 +425,7 @@ class Taxi(pygame.sprite.Sprite):
             self._flags &= ~Taxi._FLAG_REAR_REACTOR
             self._acceleration.x = 0.0
 
-        if keys[pygame.K_DOWN] or y_axis > 0.5 and not gear_out:
+        if (keys[pygame.K_DOWN] or y_axis > 0.5) and (not gear_out and not gear_shocks):
             self._flags &= ~Taxi._FLAG_BOTTOM_REACTOR
             self._flags |= Taxi._FLAG_TOP_REACTOR
             self._acceleration.y = min(self._acceleration.y + Taxi._TOP_REACTOR_POWER, Taxi._MAX_ACCELERATION_Y_DOWN)
