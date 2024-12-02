@@ -344,6 +344,7 @@ class Taxi(pygame.sprite.Sprite):
         self._unlock_time = pygame.time.get_ticks() + duration
 
     def _combine_reactor_mask(self) -> None:
+        """ Crée un mask qui inclut les réacteurs qui sont activées selon les flags du taxi"""
         facing = self._flags & Taxi._FLAG_LEFT
 
         mask_with_reactor = pygame.mask.from_surface(self.image)
@@ -354,9 +355,9 @@ class Taxi(pygame.sprite.Sprite):
             (Taxi._FLAG_REAR_REACTOR, ImgSelector.REAR_REACTOR)
         ]
 
-        for flag, selector in reactors:
+        for flag, activated_reactor in reactors:
             if self._flags & flag:
-                reactor_mask = self._masks[selector][facing]
+                reactor_mask = self._masks[activated_reactor][facing]
                 mask_with_reactor.draw(reactor_mask, (0, 0))
 
         self.mask_taxi_reactor = mask_with_reactor
