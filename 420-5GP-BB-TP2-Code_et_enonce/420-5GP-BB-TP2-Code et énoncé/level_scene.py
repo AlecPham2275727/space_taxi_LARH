@@ -28,6 +28,7 @@ class LevelScene(Scene):
         :param level: le numéro de niveau
         """
         super().__init__()
+        self._astronaut = None
         self._settings = GameSettings()
         self.level = level
         self._config_file = self._settings.get_level_configuration(self.level)
@@ -160,6 +161,8 @@ class LevelScene(Scene):
                 if self._taxi.pad_landed_on.number == self._astronaut.source_pad.number:
                     if self._astronaut.is_waiting_for_taxi():
                         self._astronaut.jump(self._taxi.rect.x + 20)
+                elif self._taxi.crashed_on_one_foot:
+                    self._astronaut.wait()
             elif self._astronaut.is_jumping_on_starting_pad():
                 self._astronaut.wait()
         else:
