@@ -26,6 +26,7 @@ from level_loading_scene import LevelLoadingScene
 from scene_manager import SceneManager
 from splash_scene import SplashScene
 from error_scene import ErrorScene
+from game_over_scene import GameOverScene
 from input_settings import InputSettings
 
 
@@ -61,6 +62,7 @@ def main() -> None:
         scene_manager.add_scene("splash", SplashScene())
         scene_manager.add_scene("level1_load", LevelLoadingScene(1))
         scene_manager.add_scene("level2_load", LevelLoadingScene(2))
+        scene_manager.add_scene("game_over", GameOverScene())
         scene_manager.set_scene("splash")
     except FileNotFoundError as e:
         handle_errors(scene_manager, e)

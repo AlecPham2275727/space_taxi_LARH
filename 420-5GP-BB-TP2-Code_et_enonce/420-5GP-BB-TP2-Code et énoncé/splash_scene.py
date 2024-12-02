@@ -39,7 +39,6 @@ class SplashScene(Scene):
                 self._fade_out_start_time = pygame.time.get_ticks()
                 SceneManager().change_scene("level1_load", SplashScene._FADE_OUT_DURATION)
 
-
     def update(self) -> None:
         if self._fade_out_start_time:
             elapsed_time = pygame.time.get_ticks() - self._fade_out_start_time
