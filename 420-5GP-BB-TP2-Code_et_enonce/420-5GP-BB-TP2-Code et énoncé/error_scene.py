@@ -5,6 +5,7 @@ import threading
 import time
 
 from scene import Scene
+from game_settings import GameSettings
 
 
 class ErrorScene(Scene):
@@ -12,6 +13,7 @@ class ErrorScene(Scene):
     def __init__(self, error_message: str):
         super().__init__()
         self.error_message = 'FATAL ERROR loading ' + error_message
+        self._settings = GameSettings()
 
         self.font_file = pygame.font.Font(None, 30)
         self.font_thread = pygame.font.Font(None, 30)
@@ -26,7 +28,7 @@ class ErrorScene(Scene):
         self.thread.start()
 
         try:
-            self._error_icon = pygame.image.load("img/error-icon.png").convert_alpha()
+            self._error_icon = pygame.image.load(self._settings.ERROR_ICON).convert_alpha()
             self._error_icon = pygame.transform.scale(self._error_icon, (200, 200))
         except pygame.error as e:
             print(f"Erreur lors du chargement de l'icône : {e}")
@@ -36,15 +38,15 @@ class ErrorScene(Scene):
             time.sleep(0.1)
             time_left = time.time() - self.start_time
             self.time_remaining = max(0, 10 - int(time_left))
-            if not self:
-                print(f"{self}")
-                break
 
-        self.stop_thread()
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
+                self.stop_thread()
+
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 9:
                 self.stop_thread()
 
     def update(self):

@@ -12,7 +12,7 @@ class GameSettings:
 
     # File names
     GAME_FONT = "fonts/boombox2.ttf"
-    ASTRONAUT_FILENAME = "img/astronaut.png"
+    ASTRONAUT_FILENAME = "img/astronautttt.png"
     LIVES_ICONS_FILENAME = "img/hud_lives.png"
     FUEL_GAUGE_FULL_FILENAME = "img/fuel_gauge_full.png"
     FUEL_GAUGE_EMPTY_FILENAME = "img/fuel_gauge_empty.png"
@@ -27,6 +27,8 @@ class GameSettings:
     CRASH_SOUND = "snd/237375__squareal__car-crash.wav"
     SMOOTH_LANDING_SOUND = "snd/8-bit-heaven-26287-[AudioTrimmer.com].wav"
     JINGLE_SOUND = "snd/petit_jingle_sound.mp3"
+    GAME_OVER_IMAGE = "img/game_over.png"
+    ERROR_ICON = "img/error-icon.png"
 
     _instance = None
 

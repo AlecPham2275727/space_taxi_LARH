@@ -4,6 +4,7 @@ import pygame
 
 from scene import Scene
 from scene_manager import SceneManager
+from game_settings import GameSettings
 
 
 class GameOverScene(Scene):
@@ -11,7 +12,8 @@ class GameOverScene(Scene):
 
     def __init__(self) -> None:
         super().__init__()
-        self._surface = pygame.image.load("img/game_over.png").convert_alpha()
+        self._settings = GameSettings()
+        self._surface = pygame.image.load(self._settings.GAME_OVER_IMAGE).convert_alpha()
 
     def handle_event(self, event: pygame.event.Event) -> None:
         pass

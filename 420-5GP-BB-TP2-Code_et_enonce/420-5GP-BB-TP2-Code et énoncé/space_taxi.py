@@ -65,8 +65,9 @@ def main() -> None:
         scene_manager.add_scene("game_over", GameOverScene())
         scene_manager.set_scene("splash")
     except FileNotFoundError as e:
-        handle_errors(scene_manager, e)
-
+        error_scene = handle_errors(scene_manager, e)
+        scene_manager.add_scene("error", error_scene)
+        scene_manager.set_scene("error")
 
     try:
         while True:
@@ -76,6 +77,7 @@ def main() -> None:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         if error_scene:
+                            print("Error")
                             error_scene.stop_thread()
                         quit_game()
 
@@ -93,9 +95,13 @@ def main() -> None:
                 pygame.display.flip()
 
             except FileNotFoundError as e:
-                handle_errors(scene_manager, e)
+                error_scene = handle_errors(scene_manager, e)
+                scene_manager.add_scene("error", error_scene)
+                scene_manager.set_scene("error")
+
     except KeyboardInterrupt:
         quit_game()
+
 
 def handle_errors(scene_manager: SceneManager, error_message: Exception):
     # Source :
@@ -107,9 +113,9 @@ def handle_errors(scene_manager: SceneManager, error_message: Exception):
     if match:
         filepath = match.group(1)
         filename = os.path.basename(filepath)
-    error_scene = ErrorScene(filename)
-    scene_manager.add_scene("error", error_scene)
-    scene_manager.set_scene("error")
+    return ErrorScene(filename)
+
+
 
 
 def quit_game() -> None:
