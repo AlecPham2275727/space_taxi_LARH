@@ -224,15 +224,19 @@ class Taxi(pygame.sprite.Sprite):
         if not self.rect.colliderect(pad.rect):
             return False
 
+
         # Définir les zones des pattes
-        left_leg_rect = pygame.Rect(self.rect.left, self.rect.bottom - 10, self.rect.width // 2, 10)
-        right_leg_rect = pygame.Rect(self.rect.centerx, self.rect.bottom - 10, self.rect.width // 2, 10)
+        left_leg_rect = pygame.Rect(self.rect.left, self.rect.bottom - 10, self.rect.width / 4, 10)
+        right_leg_rect = pygame.Rect(self.rect.centerx + 13, self.rect.bottom - 10, self.rect.width / 4, 10)
 
         # Vérifier les collisions des masques des pattes
-        left_leg_collision = self.mask.overlap(pad.mask, (pad.rect.x - left_leg_rect.x, pad.rect.y - left_leg_rect.y))
-        right_leg_collision = self.mask.overlap(pad.mask, (pad.rect.x - right_leg_rect.x, pad.rect.y - right_leg_rect.y))
+        left_leg_offset = (left_leg_rect.x - pad.rect.x, left_leg_rect.y - pad.rect.y)
+        right_leg_offset = (right_leg_rect.x - pad.rect.x, right_leg_rect.y - pad.rect.y)
 
-        if left_leg_collision and right_leg_collision:
+        left_leg_collision = self.mask.overlap(pad.mask, left_leg_offset)
+        right_leg_collision = self.mask.overlap(pad.mask, right_leg_offset)
+
+        if not (left_leg_collision and right_leg_collision):
             # Atterrissage réussi
             print(f"Vitesse verticale lors de l'atterrissage: {self._velocity.y}")
 
@@ -241,8 +245,7 @@ class Taxi(pygame.sprite.Sprite):
                 self._flags |= Taxi._FLAG_GEAR_SHOCKS
                 self._start_compressed_gear_time = pygame.time.get_ticks()
 
-            elif self._velocity.y <= self._MAX_VELOCITY_SMOOTH_LANDING:
-                # self._flags &= ~self._FLAG_GEAR_SHOCKS
+            elif self._MAX_VELOCITY_SMOOTH_LANDING >= self._velocity.y > 0.0:
                 print("PLAYING SOUND")
                 self._smooth_landing_sound.play()
                 self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
@@ -256,7 +259,7 @@ class Taxi(pygame.sprite.Sprite):
             if self._astronaut:
                 if self._astronaut.target_pad == Pad.UP:
                     print("L'astronaute doit être transporté vers la sortie, non débarqué.")
-                elif self._astronaut.target_pad.number == pad.number:
+                elif self._astronaut.target_pad.number == pad.number and not self._astronaut.isDisembarked:
                     self.unboard_astronaut()
             return True
         else:
@@ -298,6 +301,8 @@ class Taxi(pygame.sprite.Sprite):
 
     def unboard_astronaut(self) -> None:
         """ Fait descendre l'astronaute qui se trouve à bord. """
+
+        self._astronaut.isDisembarked = True
         self._astronaut.set_arrived_target(True)
         if self._astronaut.target_pad is not Pad.UP:
             self._astronaut.move(self.rect.x + 20, self._pad_landed_on.rect.y - self._astronaut.rect.height)
