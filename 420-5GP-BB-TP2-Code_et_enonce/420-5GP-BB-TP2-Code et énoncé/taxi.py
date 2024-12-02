@@ -8,7 +8,7 @@ from enum import Enum, auto
 
 import pygame
 
-from astronaut import Astronaut
+from astronaut import Astronaut, AstronautState
 from hud import HUD
 from obstacle import Obstacle
 from pad import Pad
@@ -224,7 +224,16 @@ class Taxi(pygame.sprite.Sprite):
         if not self.rect.colliderect(pad.rect):
             return False
 
-        if pygame.sprite.collide_mask(self, pad):
+        # Définir les zones des pattes
+        left_leg_rect = pygame.Rect(self.rect.left, self.rect.bottom - 10, self.rect.width // 2, 10)
+        right_leg_rect = pygame.Rect(self.rect.centerx, self.rect.bottom - 10, self.rect.width // 2, 10)
+
+        # Vérifier les collisions des masques des pattes
+        left_leg_collision = self.mask.overlap(pad.mask, (pad.rect.x - left_leg_rect.x, pad.rect.y - left_leg_rect.y))
+        right_leg_collision = self.mask.overlap(pad.mask, (pad.rect.x - right_leg_rect.x, pad.rect.y - right_leg_rect.y))
+
+        if left_leg_collision and right_leg_collision:
+            # Atterrissage réussi
             print(f"Vitesse verticale lors de l'atterrissage: {self._velocity.y}")
 
             if self._MAX_VELOCITY_SMOOTH_LANDING < self._velocity.y <= self._MAX_VELOCITY_ROUGH_LANDING:
@@ -244,11 +253,30 @@ class Taxi(pygame.sprite.Sprite):
             self._sliding = True
 
             self._pad_landed_on = pad
-            if self._astronaut and self._astronaut.target_pad.number == pad.number:
-                self.unboard_astronaut()
+            if self._astronaut:
+                if self._astronaut.target_pad == Pad.UP:
+                    print("L'astronaute doit être transporté vers la sortie, non débarqué.")
+                elif self._astronaut.target_pad.number == pad.number:
+                    self.unboard_astronaut()
             return True
+        else:
+            # Crash si une seule patte est sur la plateforme
+            self.handle_crash(pad)
+            return False
 
-        return False
+    def handle_crash(self, pad):
+        """ Gère le crash du taxi et interrompt toutes les animations. """
+        self._flags = Taxi._FLAG_DESTROYED
+        self._crash_sound.play()
+        self._velocity = pygame.Vector2(0.0)
+        self._acceleration.y = Taxi._CRASH_ACCELERATION
+        self._acceleration.x = 0.0
+
+        if self._astronaut:
+            self._astronaut.stop_animation()
+            self._astronaut.move(self._astronaut.rect.x, self._astronaut.rect.y)
+
+        self._hud.loose_live()
 
     def refuel_from(self, pump: Pump) -> bool:
         """
@@ -337,6 +365,9 @@ class Taxi(pygame.sprite.Sprite):
         if not self._fuel_ran_out:
             self._consume_fuel()
 
+        if self.is_destroyed():
+            return
+
 
     def lock_movement(self, duration):
         """ Verrouille le mouvement du taxi pendant une durée spécifiée (en millisecondes). """
@@ -396,7 +427,7 @@ class Taxi(pygame.sprite.Sprite):
             self._acceleration.y = min(self._acceleration.y + Taxi._TOP_REACTOR_POWER, Taxi._MAX_ACCELERATION_Y_DOWN)
 
         elif keys[pygame.K_UP] or y_axis < -0.5:
-            self._flags &= ~Taxi._FLAG_TOP_REACTOR
+            self._flags &= ~Taxi._FLAG_GEAR_OUT # rentrer le train d'atterrissage
             self._flags |= Taxi._FLAG_BOTTOM_REACTOR
             self._acceleration.y = max(self._acceleration.y - Taxi._BOTTOM_REACTOR_POWER, -Taxi._MAX_ACCELERATION_Y_UP)
             if self._pad_landed_on:

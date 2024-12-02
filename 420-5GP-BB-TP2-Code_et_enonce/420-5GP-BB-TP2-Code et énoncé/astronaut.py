@@ -43,6 +43,9 @@ class Astronaut(pygame.sprite.Sprite):
                     AstronautState.APPEAR: 0.2,
                     AstronautState.REACHED_DESTINATION: 1}
 
+    _FRAMES = None
+    _AUDIO_CLIPS = None
+
     def __init__(self, source_pad: Pad, target_pad: Pad, gate: Gate = None) -> None:
         """
         Initialise une instance d'astronaute.
@@ -62,6 +65,10 @@ class Astronaut(pygame.sprite.Sprite):
         self._last_saved_time = None
         self._disappear_animation_finished = False
 
+        if Astronaut._FRAMES is None or Astronaut._AUDIO_CLIPS is None:
+            Astronaut._FRAMES, Astronaut._AUDIO_CLIPS = self._load_shared_resources()
+
+        self._all_frames = Astronaut._FRAMES
         self._hey_taxi_clips, self._pad_please_clips, self._hey_clips = Astronaut._load_clips()
 
         (waiting_frames, waving_frames, jumping_left_frames, jumping_right_frames,
@@ -255,10 +262,10 @@ class Astronaut(pygame.sprite.Sprite):
                     self.change_state(AstronautState.REACHED_DESTINATION)
                 else:
                     self._state = AstronautState.ONBOARD
+                    self._play_destination_clip()
                     if self._target_pad is None:
                         self._pad_please_clips[0].play()
                     else:
-                        self._pad_please_clips[self._target_pad.number].play()
                         self._hud.display_pad_destination(self.target_pad.number)
 
                 return
@@ -267,6 +274,9 @@ class Astronaut(pygame.sprite.Sprite):
             self.rect.x = round(self._pos_x)
 
         self.image, self.mask = self._frames[self._current_frame]
+
+        if self._state == AstronautState.REACHED_DESTINATION:
+            return
 
     def change_state(self, entered_state):
         self._state = entered_state
@@ -395,3 +405,26 @@ class Astronaut(pygame.sprite.Sprite):
         heys = [pygame.mixer.Sound("voices/gary_hey_01.mp3")]
 
         return hey_taxis, pad_pleases, heys
+
+    def _play_destination_clip(self) -> None:
+        """ Joue un clip audio qui indique la destination. """
+        if self._target_pad is Pad.UP:
+            clip = self._pad_please_clips[0] # Si la destination est "Up"
+        else:
+            pad_number = self._target_pad.number
+            clip = self._pad_please_clips[pad_number]
+        clip.play()
+
+    @staticmethod
+    def _load_shared_resources():
+        """ Charge les ressources partagées par toutes les instances. """
+        frames = Astronaut._load_and_build_frames()
+        audio_clips = Astronaut._load_clips()
+        return frames, audio_clips
+
+    def stop_animation(self):
+        """ Arrête toute animation et interaction de l'astronaute.self """
+        self._state = AstronautState.REACHED_DESTINATION
+        self._velocity = 0.0
+        self._current_frame = 0
+        print("Animation de l'astronaute arrêtée.")
