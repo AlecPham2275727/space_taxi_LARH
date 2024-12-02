@@ -29,6 +29,7 @@ class GameSettings:
     JINGLE_SOUND = "snd/petit_jingle_sound.mp3"
     GAME_OVER_IMAGE = "img/game_over.png"
     ERROR_ICON = "img/error-icon.png"
+    ROUGH_LANDING_SOUND = "snd/rough_landing_sound.wav"
 
     _instance = None
 
