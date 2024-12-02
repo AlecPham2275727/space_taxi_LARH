@@ -12,7 +12,7 @@ class GameSettings:
 
     # File names
     GAME_FONT = "fonts/boombox2.ttf"
-    ASTRONAUT_FILENAME = "img/astronautss.png"
+    ASTRONAUT_FILENAME = "img/astronaut.png"
     LIVES_ICONS_FILENAME = "img/hud_lives.png"
     FUEL_GAUGE_FULL_FILENAME = "img/fuel_gauge_full.png"
     FUEL_GAUGE_EMPTY_FILENAME = "img/fuel_gauge_empty.png"

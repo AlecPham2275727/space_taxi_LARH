@@ -114,7 +114,7 @@ def quit_game() -> None:
     pygame.mixer.music.stop()
     pygame.quit()
     sys.exit(0)
-    
+
 
 if __name__ == '__main__':
     main()
