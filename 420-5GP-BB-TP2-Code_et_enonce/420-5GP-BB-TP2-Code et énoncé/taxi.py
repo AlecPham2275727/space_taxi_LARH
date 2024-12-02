@@ -96,6 +96,7 @@ class Taxi(pygame.sprite.Sprite):
 
         self._movement_locked = False
         self._unlock_time = 0
+        self.crashed_on_one_foot = False
 
     @property
     def pad_landed_on(self) -> Pad or None:
@@ -274,10 +275,7 @@ class Taxi(pygame.sprite.Sprite):
         self._velocity = pygame.Vector2(0.0)
         self._acceleration.y = Taxi._CRASH_ACCELERATION
         self._acceleration.x = 0.0
-
-        if self._astronaut:
-            self._astronaut.stop_animation()
-            self._astronaut.move(self._astronaut.rect.x, self._astronaut.rect.y)
+        self.crashed_on_one_foot = True
 
         self._hud.loose_live()
 
@@ -464,6 +462,7 @@ class Taxi(pygame.sprite.Sprite):
         self._hud.set_trip_money(0.0)
         self._hud.reset_fuel()
         self._fuel_ran_out = False
+        self.crashed_on_one_foot = True
 
     def _consume_fuel(self):
         """
