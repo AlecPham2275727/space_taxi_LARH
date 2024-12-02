@@ -42,4 +42,4 @@ class GameSettings:
             self._initialized = True
 
     def get_level_configuration(self, level: int) -> str:
-        return  f"level{level}.cfg"
+        return f"level{level}.cfg"
