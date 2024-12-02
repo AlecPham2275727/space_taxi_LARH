@@ -6,7 +6,9 @@ import time
 
 from scene import Scene
 
+
 class ErrorScene(Scene):
+    _TOTAL_DURATION = 10
     def __init__(self, error_message: str):
         super().__init__()
         self.error_message = 'FATAL ERROR loading ' + error_message
@@ -18,10 +20,10 @@ class ErrorScene(Scene):
         self.time_remaining = 10
         self._key_to_press = "ESCAPE"
 
+        self._quit_immediate = threading.Event()
+        self.start_time = time.time()
         self.thread = threading.Thread(target=self.countdown)
         self.thread.start()
-        self._time_up = False
-        self.start_time = time.time()
 
         try:
             self._error_icon = pygame.image.load("img/error-icon.png").convert_alpha()
@@ -29,24 +31,29 @@ class ErrorScene(Scene):
         except pygame.error as e:
             print(f"Erreur lors du chargement de l'icône : {e}")
 
-
     def countdown(self):
-        time.sleep(10)
-        self._time_up = True
+        while time.time() - self.start_time < self._TOTAL_DURATION and not self._quit_immediate.is_set():
+            time.sleep(0.1)
+            time_left = time.time() - self.start_time
+            self.time_remaining = max(0, 10 - int(time_left))
+            if not self:
+                print(f"{self}")
+                break
+
+        self.stop_thread()
 
     def handle_event(self, event):
-        if event.type == pygame.QUIT:
-            self.quit_game()
-        elif event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                self.quit_game()
+                self.stop_thread()
 
     def update(self):
         """Mettre à jour le temps restant."""
-        time_left = time.time() - self.start_time
-        self.time_remaining = max(0, 10 - int(time_left))
-        if self._time_up:
+        if self._quit_immediate.is_set():
             self.quit_game()
+
+    def stop_thread(self):
+        self._quit_immediate.set()
 
     def render(self, screen):
         screen.fill((0, 0, 0))

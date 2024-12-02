@@ -23,7 +23,6 @@ import sys
 
 from game_settings import GameSettings
 from level_loading_scene import LevelLoadingScene
-from level_scene import LevelScene
 from scene_manager import SceneManager
 from splash_scene import SplashScene
 from error_scene import ErrorScene
@@ -41,6 +40,7 @@ def main() -> None:
     input_settings = InputSettings()
     screen = pygame.display.set_mode((settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT))
     pygame.display.set_caption("Tribute to Space Taxi!")
+    error_scene = None
 
     # Ajouter l'icône personnalisée
     try:
@@ -63,17 +63,7 @@ def main() -> None:
         scene_manager.add_scene("level2_load", LevelLoadingScene(2))
         scene_manager.set_scene("splash")
     except FileNotFoundError as e:
-        # Source :
-        # https://www.geeksforgeeks.org/python-program-to-get-the-file-name-from-the-file-path/
-        # https://docs.python.org/fr/3/howto/regex.html
-        # Dans le str(e), recherche une chaine qui commence par No file suivie de chaine différentes de ' et finit par '
-        match = re.search(r"No file '([^']+)'", str(e))
-        filename = ""
-        if match:
-            filepath = match.group(1)
-            filename = os.path.basename(filepath)
-        scene_manager.add_scene("error", ErrorScene(filename))
-        scene_manager.set_scene("error")
+        handle_errors(scene_manager, e)
 
 
     try:
@@ -83,6 +73,8 @@ def main() -> None:
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
+                        if error_scene:
+                            error_scene.stop_thread()
                         quit_game()
 
                     scene_manager.handle_event(event)
@@ -99,28 +91,30 @@ def main() -> None:
                 pygame.display.flip()
 
             except FileNotFoundError as e:
-                #Source :
-                #https://www.geeksforgeeks.org/python-program-to-get-the-file-name-from-the-file-path/
-                #https://docs.python.org/fr/3/howto/regex.html
-                #Dans le str(e), recherche une chaine qui commence par No file suivie de chaine différentes de ' et finit par '
-                match = re.search(r"No file '([^']+)'", str(e))
-                filename = ""
-                if match:
-                    filepath = match.group(1)
-                    filename = os.path.basename(filepath)
-                scene_manager.add_scene("error", ErrorScene(filename))
-                scene_manager.set_scene("error")
+                handle_errors(scene_manager, e)
     except KeyboardInterrupt:
         quit_game()
 
-
+def handle_errors(scene_manager: SceneManager, error_message: Exception):
+    # Source :
+    # https://www.geeksforgeeks.org/python-program-to-get-the-file-name-from-the-file-path/
+    # https://docs.python.org/fr/3/howto/regex.html
+    # Dans le str(e), recherche une chaine qui commence par No file suivie de chaine différentes de ' et finit par '
+    match = re.search(r"No file '([^']+)'", str(error_message))
+    filename = ""
+    if match:
+        filepath = match.group(1)
+        filename = os.path.basename(filepath)
+    error_scene = ErrorScene(filename)
+    scene_manager.add_scene("error", error_scene)
+    scene_manager.set_scene("error")
 
 
 def quit_game() -> None:
     pygame.mixer.music.stop()
     pygame.quit()
     sys.exit(0)
-
+    
 
 if __name__ == '__main__':
     main()
