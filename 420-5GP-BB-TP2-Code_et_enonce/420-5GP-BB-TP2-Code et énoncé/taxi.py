@@ -30,6 +30,11 @@ class ImgSelector(Enum):
     GEAR_OUT_AND_BOTTOM_REACTOR = auto()
     DESTROYED = auto()
 
+class DirectionSelector(Enum):
+    LEFT = auto()
+    RIGHT = auto()
+    UP = auto()
+    DOWN = auto()
 
 class Taxi(pygame.sprite.Sprite):
     """ Un taxi spatial. """
@@ -98,6 +103,10 @@ class Taxi(pygame.sprite.Sprite):
         self._movement_locked = False
         self._unlock_time = 0
         self.crashed_on_one_foot = False
+
+        self._previous_direction_x = None
+        self._previous_direction_y = None
+
 
     @property
     def pad_landed_on(self) -> Pad or None:
@@ -415,11 +424,16 @@ class Taxi(pygame.sprite.Sprite):
         gear_out = self._flags & Taxi._FLAG_GEAR_OUT == Taxi._FLAG_GEAR_OUT
         gear_shocks = self._flags & Taxi._FLAG_GEAR_SHOCKS == Taxi._FLAG_GEAR_SHOCKS
 
+        current_direction_x = None
+        current_direction_y = None
+
         if (keys[pygame.K_LEFT] or x_axis < -0.5) and (not gear_out and not gear_shocks):
+            current_direction_x = DirectionSelector.LEFT
             self._flags |= Taxi._FLAG_LEFT | Taxi._FLAG_REAR_REACTOR
             self._acceleration.x = max(self._acceleration.x - Taxi._REAR_REACTOR_POWER, -Taxi._MAX_ACCELERATION_X)
 
         elif (keys[pygame.K_RIGHT] or x_axis > 0.5) and (not gear_out and not gear_shocks):
+            current_direction_x = DirectionSelector.RIGHT
             self._flags &= ~Taxi._FLAG_LEFT
             self._flags |= self._FLAG_REAR_REACTOR
             self._acceleration.x = min(self._acceleration.x + Taxi._REAR_REACTOR_POWER, Taxi._MAX_ACCELERATION_X)
@@ -427,13 +441,20 @@ class Taxi(pygame.sprite.Sprite):
         else:
             self._flags &= ~Taxi._FLAG_REAR_REACTOR
             self._acceleration.x = 0.0
+         
+        if current_direction_x != self._previous_direction_x:
+            self._acceleration.x = 0.0
+        
+        self._previous_direction_x = current_direction_x
 
         if (keys[pygame.K_DOWN] or y_axis > 0.5) and (not gear_out and not gear_shocks):
+            current_direction_y = DirectionSelector.DOWN
             self._flags &= ~Taxi._FLAG_BOTTOM_REACTOR
             self._flags |= Taxi._FLAG_TOP_REACTOR
             self._acceleration.y = min(self._acceleration.y + Taxi._TOP_REACTOR_POWER, Taxi._MAX_ACCELERATION_Y_DOWN)
 
         elif keys[pygame.K_UP] or y_axis < -0.5:
+            current_direction_y = DirectionSelector.UP
             self._flags &= ~Taxi._FLAG_GEAR_OUT # rentrer le train d'atterrissage
             self._flags |= Taxi._FLAG_BOTTOM_REACTOR
             self._acceleration.y = max(self._acceleration.y - Taxi._BOTTOM_REACTOR_POWER, -Taxi._MAX_ACCELERATION_Y_UP)
@@ -443,6 +464,13 @@ class Taxi(pygame.sprite.Sprite):
         else:
             self._flags &= ~(Taxi._FLAG_TOP_REACTOR | Taxi._FLAG_BOTTOM_REACTOR)
             self._acceleration.y = 0.0
+
+        
+        if current_direction_y != self._previous_direction_y:
+            self._acceleration.y = 0.0
+        
+        self._previous_direction_y = current_direction_y
+
 
     def _reinitialize(self) -> None:
         """ Initialise (ou réinitialise) les attributs de l'instance. """
