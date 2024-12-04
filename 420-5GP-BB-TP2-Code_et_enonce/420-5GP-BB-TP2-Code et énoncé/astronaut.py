@@ -19,6 +19,7 @@ class AstronautState(Enum):
     JUMPING_LEFT = auto()
     ONBOARD = auto()
     REACHED_DESTINATION = auto()
+    DISAPPEAR = auto()
     APPEAR = auto()
 
 
@@ -41,7 +42,8 @@ class Astronaut(pygame.sprite.Sprite):
                     AstronautState.JUMPING_LEFT: 0.15,
                     AstronautState.JUMPING_RIGHT: 0.15,
                     AstronautState.APPEAR: 0.2,
-                    AstronautState.REACHED_DESTINATION: 1}
+                    AstronautState.REACHED_DESTINATION: 1,
+                    AstronautState.DISAPPEAR: 1}
 
     _FRAMES = None
     _AUDIO_CLIPS = None
@@ -64,6 +66,7 @@ class Astronaut(pygame.sprite.Sprite):
         self._trip_money = self.calculate_trip_price()
         self._time_is_money = 0.0
         self._last_saved_time = None
+        self._out_animation_finished = False
         self._disappear_animation_finished = False
 
         if Astronaut._FRAMES is None or Astronaut._AUDIO_CLIPS is None:
@@ -79,7 +82,8 @@ class Astronaut(pygame.sprite.Sprite):
                             AstronautState.JUMPING_LEFT: jumping_left_frames,
                             AstronautState.JUMPING_RIGHT: jumping_right_frames,
                             AstronautState.APPEAR: appear_frames,
-                            AstronautState.REACHED_DESTINATION: disappear_frames}
+                            AstronautState.REACHED_DESTINATION: disappear_frames,
+                            AstronautState.DISAPPEAR: disappear_frames}
 
         self.image, self.mask = self._all_frames[AstronautState.APPEAR][0]
         self.rect = self.image.get_rect()
@@ -141,16 +145,25 @@ class Astronaut(pygame.sprite.Sprite):
     def get_arrived_target(self) -> bool:
         return self._arrived_pad_target
 
-    def has_reached_destination(self) -> bool:
+    def die(self):
+        if self._state != AstronautState.DISAPPEAR:
+            self.scream_in_agony()
+            self.disappear()
+
+    def has_disappeared(self):
         return self._disappear_animation_finished
+
+    def scream_in_agony(self) -> None:
+        clip = random.choice(self._hey_clips)
+        clip.play()
+
+    def has_reached_destination(self) -> bool:
+        return self._out_animation_finished
 
     def reset_trip_money(self) -> None:
         self._time_is_money = 0.0
         self._trip_money = 0.0
 
-    def scream_in_agony(self) -> None:
-        clip = random.choice(self._hey_clips)
-        clip.play()
 
     def is_jumping_on_starting_pad(self) -> bool:
         """
@@ -229,8 +242,7 @@ class Astronaut(pygame.sprite.Sprite):
             return
 
         # ÉTAPE 2 - changer de trame si le moment est venu
-        frame_change_condition = None
-        if self._state == AstronautState.REACHED_DESTINATION:
+        if self._state == (AstronautState.DISAPPEAR or AstronautState.REACHED_DESTINATION):
             frame_change_condition = (current_time - self._last_frame_time >=
                                       Astronaut._FRAME_TIMES[self._state]/len(self._frames))
         else:
@@ -244,9 +256,12 @@ class Astronaut(pygame.sprite.Sprite):
         if ((self._state == AstronautState.APPEAR) and
                 (self._state_time >= self._FRAME_TIMES[AstronautState.REACHED_DESTINATION] * len(self._frames))):
             self.change_state(AstronautState.WAITING)
-        elif ((self._state == AstronautState.REACHED_DESTINATION) and
-              (self._state_time >= self._FRAME_TIMES[AstronautState.REACHED_DESTINATION] * len(self._frames))):
-            self._disappear_animation_finished = True
+        elif self._state == (AstronautState.DISAPPEAR or AstronautState.REACHED_DESTINATION):
+            if self._state_time >= self._FRAME_TIMES[AstronautState.REACHED_DESTINATION] * len(self._frames):
+                if self._state == AstronautState.REACHED_DESTINATION:
+                    self._out_animation_finished = True
+                else:
+                    self._disappear_animation_finished = True
         elif self._state == AstronautState.WAITING:
             if self._state_time >= self._waving_delay:
                 self._call_taxi()
@@ -289,6 +304,9 @@ class Astronaut(pygame.sprite.Sprite):
     def wait(self) -> None:
         """ Replace l'astronaute dans l'état d'attente. """
         self.change_state(AstronautState.WAITING)
+
+    def disappear(self) -> None:
+        self.change_state(AstronautState.DISAPPEAR)
 
     def _call_taxi(self) -> None:
         """ Joue le son d'appel du taxi. """
