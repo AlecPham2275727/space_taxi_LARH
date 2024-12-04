@@ -272,15 +272,15 @@ class Taxi(pygame.sprite.Sprite):
             if self._astronaut:
                 if self._astronaut.target_pad == Pad.UP:
                     print("L'astronaute doit être transporté vers la sortie, non débarqué.")
-                elif self._astronaut.target_pad.number == pad.number and not self._astronaut.isDisembarked:
+                elif (self._astronaut.target_pad.number == pad.number) and not self._astronaut.isDisembarked:
                     self.unboard_astronaut()
             return True
         else:
             # Crash si une seule patte est sur la plateforme
-            self.handle_crash(pad)
+            self.handle_crash()
             return False
 
-    def handle_crash(self, pad):
+    def handle_crash(self):
         """ Gère le crash du taxi et interrompt toutes les animations. """
         self._flags = Taxi._FLAG_DESTROYED
         self._crash_sound.play()
@@ -311,7 +311,7 @@ class Taxi(pygame.sprite.Sprite):
 
     def unboard_astronaut(self) -> None:
         """ Fait descendre l'astronaute qui se trouve à bord. """
-
+        self.crashed_on_one_foot = False
         self._astronaut.isDisembarked = True
         self._astronaut.set_arrived_target(True)
         if self._astronaut.target_pad is not Pad.UP:

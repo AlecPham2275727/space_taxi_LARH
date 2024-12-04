@@ -285,7 +285,7 @@ class Astronaut(pygame.sprite.Sprite):
         self._frames = self._all_frames[entered_state]
         self._current_frame = 0
 
-    # refactor
+    # refactorisation
     def wait(self) -> None:
         """ Replace l'astronaute dans l'état d'attente. """
         self.change_state(AstronautState.WAITING)
