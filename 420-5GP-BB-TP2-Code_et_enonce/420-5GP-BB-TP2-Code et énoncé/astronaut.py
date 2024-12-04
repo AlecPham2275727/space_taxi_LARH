@@ -60,7 +60,7 @@ class Astronaut(pygame.sprite.Sprite):
         self._gate = gate
         self._source_pad = source_pad
         self._target_pad = target_pad
-
+        self.taxi_destroyed = False
         self._hud = HUD()
 
         self._trip_money = self.calculate_trip_price()
