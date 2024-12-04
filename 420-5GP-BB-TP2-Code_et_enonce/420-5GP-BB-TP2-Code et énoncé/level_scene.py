@@ -144,7 +144,7 @@ class LevelScene(Scene):
                     self._nb_taxied_astronauts += 1
                     self._astronaut = None
                     self._last_taxied_astronaut_time = time.time()
-            elif self._taxi.hit_astronaut(self._astronaut):
+            elif self._taxi.hit_astronaut(self._astronaut) and not self._astronaut.is_disappearing():
                 self._astronaut.die()
             elif self._astronaut.has_disappeared():
                 if self._astronaut.get_arrived_target():
