@@ -1,4 +1,5 @@
 import pygame
+import os
 
 from level_scene import LevelScene
 from scene import Scene
@@ -32,10 +33,11 @@ class LevelLoadingScene(Scene):
 
     def load_level(self):
         self._fade_out_start_time = pygame.time.get_ticks()
-        try:
+        
+        if os.path.exists(self._settings.get_level_configuration(self._level)):
             SceneManager().add_scene(f"level{self._level}", LevelScene(self._level))
             SceneManager().change_scene(f"level{self._level}", LevelLoadingScene._FADE_OUT_DURATION)
-        except:
+        else:
             SceneManager().change_scene("game_over", LevelLoadingScene._FADE_OUT_DURATION)
 
     def update(self) -> None:
