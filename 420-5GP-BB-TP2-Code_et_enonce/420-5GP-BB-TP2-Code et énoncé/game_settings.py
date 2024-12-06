@@ -30,6 +30,7 @@ class GameSettings:
     GAME_OVER_IMAGE = "img/game_over.png"
     ERROR_ICON = "img/error-icon.png"
     ROUGH_LANDING_SOUND = "snd/rough_landing_sound.wav"
+    LEVEL_LOADING_SCENE = "img/ecran_chargement.png"
 
     _instance = None
 
@@ -46,3 +47,11 @@ class GameSettings:
 
     def get_level_configuration(self, level: int) -> str:
         return f"level{level}.cfg"
+
+    def get_level_name(self, level: int) -> str:
+        level_names = {
+            1: "Niveau 1",
+            2: "Niveau 2",
+            3: "Niveau 3"
+        }
+        return level_names.get(level, f"Level {level}")
