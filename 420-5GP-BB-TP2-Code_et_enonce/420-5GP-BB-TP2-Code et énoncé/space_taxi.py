@@ -60,8 +60,10 @@ def main() -> None:
 
     try:
         scene_manager.add_scene("splash", SplashScene())
-        scene_manager.add_scene("level1_load", LevelLoadingScene(1))
-        scene_manager.add_scene("level2_load", LevelLoadingScene(2))
+        level = 1
+        level_name = GameSettings().get_level_name(level)
+        scene_manager.add_scene("level1_load", LevelLoadingScene(1, level_name))
+        scene_manager.add_scene("level2_load", LevelLoadingScene(2, level_name))
         scene_manager.add_scene("game_over", GameOverScene())
         scene_manager.set_scene("splash")
     except FileNotFoundError as e:
@@ -114,9 +116,6 @@ def handle_errors(scene_manager: SceneManager, error_message: Exception):
         filepath = match.group(1)
         filename = os.path.basename(filepath)
     return ErrorScene(filename)
-
-
-
 
 def quit_game() -> None:
     pygame.mixer.music.stop()
