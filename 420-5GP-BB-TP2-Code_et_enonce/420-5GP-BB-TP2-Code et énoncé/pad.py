@@ -56,6 +56,7 @@ class Pad(pygame.sprite.Sprite):
 
 
     def _load_pad_from_memory(self, filename: str) -> None:
+        """ Charge l'image d'une plateforme à partir de la mémoire """
         if filename in Pad._PAD_IN_MEMORY:
             return self._PAD_IN_MEMORY[filename]
         else:

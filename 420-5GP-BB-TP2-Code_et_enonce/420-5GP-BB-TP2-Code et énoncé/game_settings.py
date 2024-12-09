@@ -46,6 +46,7 @@ class GameSettings:
             self._initialized = True
 
     def get_level_configuration(self, level: int) -> str:
+        """ Retourne le nom de fichier de configuration de niveau en fonction du niveau """
         return f"level{level}.cfg"
 
     def get_level_name(self, level: int) -> str:

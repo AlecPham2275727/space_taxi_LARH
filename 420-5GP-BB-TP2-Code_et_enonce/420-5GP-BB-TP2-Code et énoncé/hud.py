@@ -142,12 +142,14 @@ class HUD:
         return self._money_font.render(f"${money_str: >5}", True, (51, 51, 51))
     
     def display_pad_destination(self, target_pad: int) -> None:
+        """ Démarre la file d'exécution pour afficher le texte """
         if self._destination_text_thread is None:
             self._destination_text_thread = threading.Thread(target=self._handle_text_display, args=(target_pad, ))
             self._destination_text_displayed_time = pygame.time.get_ticks()
             self._destination_text_thread.start()
 
     def _handle_text_display(self, target_pad: int) -> None:
+        """ Change l'alpha du texte de destination en fonction du temps de jeu """
         # Le code suivant a été insipiré d'un segment de code d'un travail académique passé. Voir read.me
         self._destination_text = f"Pad {target_pad} please!"
         total_duration = self._TEXT_FADE_IN_DURATION + self._OPAQUE_TEXT_DURATION +  self._TEXT_FADE_OUT_DURATION
@@ -170,6 +172,7 @@ class HUD:
         self._destination_text_thread = None 
     
     def _update_text_opacity(self) -> None:
+        """ Redessine la surface du texte de destination """
          # Source: https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
         displayed_destination_text = self._destination_font.render(self._destination_text, True, (255, 255, 255))
         displayed_destination_text.set_alpha(self._destination_text_alpha) 

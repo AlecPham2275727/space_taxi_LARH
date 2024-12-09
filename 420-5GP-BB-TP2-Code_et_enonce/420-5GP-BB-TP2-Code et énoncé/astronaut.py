@@ -156,6 +156,7 @@ class Astronaut(pygame.sprite.Sprite):
         return self._disappear_animation_finished
 
     def scream_in_agony(self) -> None:
+        """ Joue un clip d'audio lorsque l'astronaute se fait frappé par le taxi """
         clip = random.choice(self._hey_clips)
         clip.play()
 
@@ -163,6 +164,7 @@ class Astronaut(pygame.sprite.Sprite):
         return self._out_animation_finished
 
     def reset_trip_money(self) -> None:
+        """ Réinitialiser l'argent du course """
         self._time_is_money = 0.0
         self._trip_money = 0.0
 
