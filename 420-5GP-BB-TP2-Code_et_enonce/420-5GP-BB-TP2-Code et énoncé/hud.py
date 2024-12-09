@@ -148,7 +148,7 @@ class HUD:
             self._destination_text_thread.start()
 
     def _handle_text_display(self, target_pad: int) -> None:
-        # The following code was inspired by a previous work in a school project: please go see the Read.me
+        # Le code suivant a été insipiré d'un segment de code d'un travail académique passé. Voir read.me
         self._destination_text = f"Pad {target_pad} please!"
         total_duration = self._TEXT_FADE_IN_DURATION + self._OPAQUE_TEXT_DURATION +  self._TEXT_FADE_OUT_DURATION
         
