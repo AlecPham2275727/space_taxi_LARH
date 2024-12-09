@@ -172,7 +172,7 @@ class HUD:
         self._destination_text_thread = None 
     
     def _update_text_opacity(self) -> None:
-        """ Redessine la surface du texte de destination """
+        """ Redessine la surface du texte de destination selon l'opacité du alpha """
          # Source: https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
         displayed_destination_text = self._destination_font.render(self._destination_text, True, (255, 255, 255))
         displayed_destination_text.set_alpha(self._destination_text_alpha) 
