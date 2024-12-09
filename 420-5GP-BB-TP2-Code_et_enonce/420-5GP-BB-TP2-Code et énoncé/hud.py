@@ -34,7 +34,7 @@ class HUD:
             self._bank_money = 0
             self._bank_money_surface = self._render_bank_money_surface()
             self._bank_money_pos = pygame.Vector2(20, self._settings.SCREEN_HEIGHT - (
-                        self._bank_money_surface.get_height() + 10))
+                    self._bank_money_surface.get_height() + 10))
 
             self._trip_money = 0
             self._trip_money_surface = self._render_trip_money_surface()
@@ -151,13 +151,15 @@ class HUD:
         return self._money_font.render(f"${money_str: >5}", True, (51, 51, 51))
 
     def display_pad_destination(self, target_pad: str) -> None:
+        """ Démarre la file d'exécution pour afficher le texte """
         if self._destination_text_thread is None:
             self._destination_text_thread = threading.Thread(target=self._handle_text_display, args=(target_pad,))
             self._destination_text_displayed_time = pygame.time.get_ticks()
             self._destination_text_thread.start()
 
     def _handle_text_display(self, target_pad: str) -> None:
-        # The following code was inspired by a previous work in a school project: please go see the Read.me
+        """ Change l'alpha du texte de destination en fonction du temps de jeu """
+        # Le code suivant a été insipiré d'un segment de code d'un travail académique passé. Voir read.me
 
         self._destination_text = f"{target_pad} please!"
         total_duration = self._TEXT_FADE_IN_DURATION + self._OPAQUE_TEXT_DURATION + self._TEXT_FADE_OUT_DURATION
@@ -180,6 +182,7 @@ class HUD:
         self._destination_text_thread = None
 
     def _update_text_opacity(self) -> None:
+        """ Redessine la surface du texte de destination selon l'opacité du alpha """
         # Source: https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
         self._lock.acquire()
         self.displayed_destination_text = self._destination_font.render(self._destination_text, True, (255, 255, 255))

@@ -128,6 +128,11 @@ class Taxi(pygame.sprite.Sprite):
         return self._crash_on_level_objects(obstacle)
 
     def _crash_on_level_objects(self, collidable_object: pygame.sprite.Sprite) -> bool:
+        """
+        Vérifie si le taxi est en situation de crash contre un objet du niveau.
+        :param collidable_object: objet qui peut être en collision
+        :return: True si le taxi est en contact avec l'objet, False sinon
+        """
         if not isinstance(collidable_object, (Pump, Pad, Obstacle)):
             return False
 
@@ -197,6 +202,7 @@ class Taxi(pygame.sprite.Sprite):
         return self.rect.y <= -self.rect.height
 
     def stop_reactor_sound(self) -> None:
+        """ Arrête le son des réacteurs """
         self._reactor_sound.stop()
 
     def hit_astronaut(self, astronaut: Astronaut) -> bool:
@@ -398,7 +404,7 @@ class Taxi(pygame.sprite.Sprite):
         self._unlock_time = pygame.time.get_ticks() + duration
 
     def _combine_reactor_mask(self) -> None:
-        """ Crée un mask qui inclut les réacteurs qui sont activées selon les flags du taxi"""
+        """ Crée un mask qui inclut les réacteurs qui sont activées selon les flags du taxi """
         facing = self._flags & Taxi._FLAG_LEFT
 
         mask_with_reactor = pygame.mask.from_surface(self.image)
@@ -417,6 +423,7 @@ class Taxi(pygame.sprite.Sprite):
         self.mask_taxi_reactor = mask_with_reactor
 
     def _handle_input(self) -> None:
+        """ Change ou non l'état du taxi en fonction des touches présentement enfoncées. """
         x_axis = y_axis = 0.0
 
         if self._joystick:
@@ -425,7 +432,6 @@ class Taxi(pygame.sprite.Sprite):
 
         keys = pygame.key.get_pressed()
 
-        """ Change ou non l'état du taxi en fonction des touches présentement enfoncées. """
         if self._flags & Taxi._FLAG_DESTROYED == Taxi._FLAG_DESTROYED:
             return
 
