@@ -21,6 +21,7 @@ class HUD:
         return cls._instance
 
     def __init__(self) -> None:
+        self._screen = None
         if not hasattr(self, '_initialized'):
             self._settings = GameSettings()
 
@@ -32,14 +33,15 @@ class HUD:
 
             self._bank_money = 0
             self._bank_money_surface = self._render_bank_money_surface()
-            self._bank_money_pos = pygame.Vector2(20, self._settings.SCREEN_HEIGHT - (self._bank_money_surface.get_height() + 10))
+            self._bank_money_pos = pygame.Vector2(20, self._settings.SCREEN_HEIGHT - (
+                        self._bank_money_surface.get_height() + 10))
 
             self._trip_money = 0
             self._trip_money_surface = self._render_trip_money_surface()
 
             self._lives = self._settings.NB_PLAYER_LIVES
             self._lives_icon = pygame.image.load(self._settings.LIVES_ICONS_FILENAME).convert_alpha()
-            self._lives_pos= pygame.Vector2(20, self._settings.SCREEN_HEIGHT - (self._lives_icon.get_height() + 40))
+            self._lives_pos = pygame.Vector2(20, self._settings.SCREEN_HEIGHT - (self._lives_icon.get_height() + 40))
 
             self._fuel_gauge_full = pygame.image.load(self._settings.FUEL_GAUGE_FULL_FILENAME).convert_alpha()
             self._fuel_gauge_empty = pygame.image.load(self._settings.FUEL_GAUGE_EMPTY_FILENAME).convert_alpha()
@@ -63,6 +65,8 @@ class HUD:
             self.visible = False
 
             self._initialized = True
+            self._lock = threading.Lock()
+            self.displayed_destination_text = None
 
     def render(self, screen: pygame.Surface) -> None:
         self._screen = screen
@@ -71,6 +75,12 @@ class HUD:
             screen.blit(self._lives_icon, (self._lives_pos.x + (n * spacing), self._lives_pos.y))
 
         screen.blit(self._bank_money_surface, (self._bank_money_pos.x, self._bank_money_pos.y))
+
+        self._lock.acquire()
+        if self.displayed_destination_text:
+            destination_text_rect = self.displayed_destination_text.get_rect(center=self._center_screen)
+            self._screen.blit(self.displayed_destination_text, destination_text_rect)
+        self._lock.release()
 
         x = self._settings.SCREEN_WIDTH - self._trip_money_surface.get_width() - 20
         y = self._settings.SCREEN_HEIGHT - self._trip_money_surface.get_height() - 10
@@ -87,10 +97,9 @@ class HUD:
         center_x = self._fuel_gauge_pos.x + self._fuel_gauge_width / 2
         center_y = self._fuel_gauge_pos.y + self._fuel_gauge_height / 2
 
-        #source : https://www.reddit.com/r/pygame/comments/qw7fmk/how_to_set_center_position_of_text/?rdt=60642
+        # source : https://www.reddit.com/r/pygame/comments/qw7fmk/how_to_set_center_position_of_text/?rdt=60642
         text_rect = fuel_text.get_rect(center=(center_x, center_y))
         screen.blit(fuel_text, text_rect)
-
 
     def add_bank_money(self, amount: float) -> None:
         self._bank_money += round(amount, 2)
@@ -140,18 +149,19 @@ class HUD:
     def _render_trip_money_surface(self) -> pygame.Surface:
         money_str = f"{self._trip_money:.2f}"
         return self._money_font.render(f"${money_str: >5}", True, (51, 51, 51))
-    
-    def display_pad_destination(self, target_pad: int) -> None:
+
+    def display_pad_destination(self, target_pad: str) -> None:
         if self._destination_text_thread is None:
-            self._destination_text_thread = threading.Thread(target=self._handle_text_display, args=(target_pad, ))
+            self._destination_text_thread = threading.Thread(target=self._handle_text_display, args=(target_pad,))
             self._destination_text_displayed_time = pygame.time.get_ticks()
             self._destination_text_thread.start()
 
-    def _handle_text_display(self, target_pad: int) -> None:
+    def _handle_text_display(self, target_pad: str) -> None:
         # The following code was inspired by a previous work in a school project: please go see the Read.me
-        self._destination_text = f"Pad {target_pad} please!"
-        total_duration = self._TEXT_FADE_IN_DURATION + self._OPAQUE_TEXT_DURATION +  self._TEXT_FADE_OUT_DURATION
-        
+
+        self._destination_text = f"{target_pad} please!"
+        total_duration = self._TEXT_FADE_IN_DURATION + self._OPAQUE_TEXT_DURATION + self._TEXT_FADE_OUT_DURATION
+
         while pygame.time.get_ticks() - self._destination_text_displayed_time < total_duration:
             elapsed_time = pygame.time.get_ticks() - self._destination_text_displayed_time
 
@@ -159,19 +169,19 @@ class HUD:
                 self._destination_text_alpha = int(255 * (elapsed_time / self._TEXT_FADE_IN_DURATION))
             elif elapsed_time < self._TEXT_FADE_IN_DURATION + self._OPAQUE_TEXT_DURATION:
                 self._destination_text_alpha = 255
-            elif elapsed_time < total_duration:
+            else:
                 self._destination_text_alpha = int(255 - 255 * (elapsed_time / total_duration))
 
             self._update_text_opacity()
             time.sleep(0.0001)
 
-        self._destination_text = None  
+        self._destination_text = None
         self._destination_text_displayed_time = None
-        self._destination_text_thread = None 
-    
+        self._destination_text_thread = None
+
     def _update_text_opacity(self) -> None:
-         # Source: https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
-        displayed_destination_text = self._destination_font.render(self._destination_text, True, (255, 255, 255))
-        displayed_destination_text.set_alpha(self._destination_text_alpha) 
-        destination_text_rect = displayed_destination_text.get_rect(center=self._center_screen)
-        self._screen.blit(displayed_destination_text, destination_text_rect)
+        # Source: https://www.geeksforgeeks.org/python-display-text-to-pygame-window/
+        self._lock.acquire()
+        self.displayed_destination_text = self._destination_font.render(self._destination_text, True, (255, 255, 255))
+        self.displayed_destination_text.set_alpha(self._destination_text_alpha)
+        self._lock.release()

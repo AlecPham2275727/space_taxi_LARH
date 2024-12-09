@@ -62,7 +62,7 @@ class Taxi(pygame.sprite.Sprite):
     _MAX_ACCELERATION_Y_DOWN = 0.05
 
     _MAX_VELOCITY_SMOOTH_LANDING = 0.50  # vitesse maximale permise pour un atterrissage en douceur
-    _MAX_VELOCITY_ROUGH_LANDING = 2.00
+    _MAX_VELOCITY_ROUGH_LANDING = 1.00
     _CRASH_ACCELERATION = 0.10
 
     _FRICTION_MUL = 0.9995  # la vitesse horizontale est multipliée par la friction
@@ -76,6 +76,8 @@ class Taxi(pygame.sprite.Sprite):
         :param pos:
         """
         super(Taxi, self).__init__()
+        self._right_leg_rect = None
+        self._left_leg_rect = None
         self._landed = False
         self._pad_landed_on = None
         self._sliding = None
@@ -239,17 +241,26 @@ class Taxi(pygame.sprite.Sprite):
 
         # Définir les zones des pattes
         # Source : https://www.pygame.org/docs/ref/rect.html
-        left_leg_rect = pygame.Rect(self.rect.left, self.rect.bottom - 10, self.rect.width / 4, 10)
-        right_leg_rect = pygame.Rect(self.rect.centerx + 13, self.rect.bottom - 10, self.rect.width / 4, 10)
+        self._left_leg_rect = pygame.Rect(self.rect.left, self.rect.bottom - 10, self.rect.width / 4, 6)
+        self._right_leg_rect = pygame.Rect(self.rect.centerx + self.rect.width / 4, self.rect.bottom - 10,
+                                           self.rect.width / 4, 6)
 
         # Vérifier les collisions des masques des pattes
-        left_leg_offset = (left_leg_rect.x - pad.rect.x, left_leg_rect.y - pad.rect.y)
-        right_leg_offset = (right_leg_rect.x - pad.rect.x, right_leg_rect.y - pad.rect.y)
+        left_leg_offset = (
+            self._left_leg_rect.x - pad.rect.x,
+            self._left_leg_rect.y - pad.rect.y)
+        right_leg_offset = (self._right_leg_rect.x - pad.rect.x,
+                            self._right_leg_rect.y - pad.rect.y)
 
-        left_leg_collision = self.mask.overlap(pad.mask, left_leg_offset)
-        right_leg_collision = self.mask.overlap(pad.mask, right_leg_offset)
+        left_leg_collision = pad.mask.overlap(pad.mask, left_leg_offset)
+        right_leg_collision = pad.mask.overlap(pad.mask, right_leg_offset)
 
-        if not (left_leg_collision and right_leg_collision):
+        print(str(left_leg_collision)+" right : "+ str(right_leg_collision))
+        if (left_leg_collision == (0, 0)) or (not right_leg_collision):
+            # Crash si une seule patte est sur la plateforme
+            self.handle_crash()
+            return False
+        elif left_leg_collision and right_leg_collision:
             if not self._landed:
                 # Atterrissage réussi
                 print(f"Vitesse verticale lors de l'atterrissage: {self._velocity.y}")
@@ -277,10 +288,6 @@ class Taxi(pygame.sprite.Sprite):
                     elif (self._astronaut.target_pad.number == pad.number) and not self._astronaut.isDisembarked:
                         self.unboard_astronaut()
             return True
-        else:
-            # Crash si une seule patte est sur la plateforme
-            self.handle_crash()
-            return False
 
     def handle_crash(self):
         """ Gère le crash du taxi et interrompt toutes les animations. """

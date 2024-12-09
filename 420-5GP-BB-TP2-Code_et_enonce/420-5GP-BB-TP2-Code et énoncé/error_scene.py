@@ -38,7 +38,7 @@ class ErrorScene(Scene):
             time.sleep(0.1)
             time_left = time.time() - self.start_time
             self.time_remaining = max(0, 10 - int(time_left))
-
+        self._quit_immediate.set()
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:

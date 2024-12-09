@@ -44,7 +44,8 @@ class Pad(pygame.sprite.Sprite):
         else:
             self.center_label(text_width, background_width, 1.5)
 
-        self.image.blit(self._label_background, self._label_background_offset)#, special_flags = pygame.BLEND_RGBA_ADD)
+        self.image.blit(self._label_background, self._label_background_offset) # , special_flags =
+        # pygame.BLEND_RGBA_ADD)
         self.image.blit(self._label_text, self._label_text_offset)
 
         self.rect = self.image.get_rect()
@@ -54,15 +55,13 @@ class Pad(pygame.sprite.Sprite):
         self.astronaut_start = pygame.Vector2(self.rect.x + astronaut_start_x, self.rect.y - 24)
         self.astronaut_end = pygame.Vector2(self.rect.x + astronaut_end_x, self.rect.y - 24)
 
-
-    def _load_pad_from_memory(self, filename: str) -> None:
+    def _load_pad_from_memory(self, filename: str) -> pygame.Surface:
         if filename in Pad._PAD_IN_MEMORY:
             return self._PAD_IN_MEMORY[filename]
         else:
             new_pad_image = pygame.image.load(filename).convert_alpha()
             self._PAD_IN_MEMORY[filename] = new_pad_image
             return new_pad_image
-        
 
     def center_label(self, text_width: int, background_width: int, divisor: float):
         self._label_text_offset = ((self.image.get_width() - text_width) / divisor + 1, 3)

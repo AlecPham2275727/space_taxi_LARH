@@ -282,8 +282,9 @@ class Astronaut(pygame.sprite.Sprite):
                     self._play_destination_clip()
                     if self._target_pad is None:
                         self._pad_please_clips[0].play()
+                        self._hud.display_pad_destination("UP")
                     else:
-                        self._hud.display_pad_destination(self.target_pad.number)
+                        self._hud.display_pad_destination(f"Pad {self.target_pad.number}")
 
                 return
 
