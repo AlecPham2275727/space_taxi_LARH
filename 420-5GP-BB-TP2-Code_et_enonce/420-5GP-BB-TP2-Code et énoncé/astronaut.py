@@ -262,6 +262,13 @@ class Astronaut(pygame.sprite.Sprite):
             if self._state_time >= self._FRAME_TIMES[AstronautState.REACHED_DESTINATION] * len(self._frames):
                 self._disappear_animation_finished = True
         elif self._state == AstronautState.REACHED_DESTINATION:
+            """
+                Il y a des traces d'une animation de disparition quand
+                l'astronaut arrive a sa destination, car j'ai cru qu'il
+                le fallait. Après, je me suis rendu compte que c'était
+                juste requis pour le décès de l'astronaut.
+                -Rigo
+            """
             self._out_animation_finished = True
 
         elif self._state == AstronautState.WAITING:
