@@ -272,7 +272,6 @@ class Taxi(pygame.sprite.Sprite):
         elif left_leg_collision and right_leg_collision:
             if not self._landed:
                 # Atterrissage réussi
-                print(f"Vitesse verticale lors de l'atterrissage: {self._velocity.y}")
                 self._landed = True
                 if self._MAX_VELOCITY_SMOOTH_LANDING < self._velocity.y <= self._MAX_VELOCITY_ROUGH_LANDING:
                     self._rough_landing_sound.play()
@@ -281,7 +280,6 @@ class Taxi(pygame.sprite.Sprite):
                     self._start_compressed_gear_time = pygame.time.get_ticks()
 
                 elif self._MAX_VELOCITY_SMOOTH_LANDING >= self._velocity.y > 0.0:
-                    print("PLAYING SOUND")
                     self._smooth_landing_sound.play()
                     self._flags &= Taxi._FLAG_LEFT | Taxi._FLAG_GEAR_OUT
 
@@ -384,11 +382,9 @@ class Taxi(pygame.sprite.Sprite):
 
         if self._flags & Taxi._FLAG_GEAR_SHOCKS:
             elapsed_time = pygame.time.get_ticks() - self._start_compressed_gear_time
-            print(f"Temps écoulé pour le rough landing: {elapsed_time} ms")
             if elapsed_time >= 500:
                 self._flags &= ~Taxi._FLAG_GEAR_SHOCKS
                 self._flags |= Taxi._FLAG_GEAR_OUT
-                print("Fin du rough landing.")
 
         # ÉTAPE 4 - sélectionner la bonne image en fonction de l'état du taxi
         self._select_image()

@@ -81,7 +81,6 @@ def main() -> None:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         if error_scene:
-                            print("Error")
                             error_scene.stop_thread()
                         quit_game()
 

@@ -463,4 +463,3 @@ class Astronaut(pygame.sprite.Sprite):
         self._state = AstronautState.REACHED_DESTINATION
         self._velocity = 0.0
         self._current_frame = 0
-        print("Animation de l'astronaute arrêtée.")
