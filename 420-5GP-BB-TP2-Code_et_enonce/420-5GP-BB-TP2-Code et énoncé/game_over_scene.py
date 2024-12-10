@@ -1,9 +1,6 @@
-import time
-
 import pygame
 
 from scene import Scene
-from scene_manager import SceneManager
 from game_settings import GameSettings
 
 

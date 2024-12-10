@@ -44,7 +44,7 @@ class Pad(pygame.sprite.Sprite):
         else:
             self.center_label(text_width, background_width, 1.5)
 
-        self.image.blit(self._label_background, self._label_background_offset) # , special_flags =
+        self.image.blit(self._label_background, self._label_background_offset)  # , special_flags =
         # pygame.BLEND_RGBA_ADD)
         self.image.blit(self._label_text, self._label_text_offset)
 

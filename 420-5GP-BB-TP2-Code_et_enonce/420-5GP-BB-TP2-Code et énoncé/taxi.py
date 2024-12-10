@@ -8,7 +8,7 @@ from enum import Enum, auto
 
 import pygame
 
-from astronaut import Astronaut, AstronautState
+from astronaut import Astronaut
 from hud import HUD
 from obstacle import Obstacle
 from pad import Pad
@@ -76,6 +76,8 @@ class Taxi(pygame.sprite.Sprite):
         :param pos:
         """
         super(Taxi, self).__init__()
+        self._velocity = None
+        self._flags = None
         self._right_leg_rect = None
         self._left_leg_rect = None
         self._landed = False
@@ -260,8 +262,9 @@ class Taxi(pygame.sprite.Sprite):
 
         left_leg_collision = pad.mask.overlap(pad.mask, left_leg_offset)
         right_leg_collision = pad.mask.overlap(pad.mask, right_leg_offset)
-
-        print(str(left_leg_collision)+" right : "+ str(right_leg_collision))
+        
+        # Si la seulement la patte droite est sur la plataforme la valeur de left_leg_collision est (0,0)
+        # Si la seulement la patte gauche est sur la plataforme la valeur de right_leg_collision est None
         if (left_leg_collision == (0, 0)) or (not right_leg_collision):
             # Crash si une seule patte est sur la plateforme
             self.handle_crash()

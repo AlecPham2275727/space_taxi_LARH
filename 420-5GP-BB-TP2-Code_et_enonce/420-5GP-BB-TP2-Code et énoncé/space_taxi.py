@@ -16,8 +16,6 @@
 """
 import os
 import re
-
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 import pygame
 import sys
 
@@ -28,6 +26,8 @@ from splash_scene import SplashScene
 from error_scene import ErrorScene
 from game_over_scene import GameOverScene
 from input_settings import InputSettings
+
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
 
 
 def main() -> None:

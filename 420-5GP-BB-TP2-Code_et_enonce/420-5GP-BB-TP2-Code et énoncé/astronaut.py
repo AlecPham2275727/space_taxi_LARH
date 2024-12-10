@@ -1,5 +1,3 @@
-import math
-
 import pygame
 import random
 import time
@@ -53,9 +51,10 @@ class Astronaut(pygame.sprite.Sprite):
         Initialise une instance d'astronaute.
         :param source_pad: le pad sur lequel apparaîtra l'astronaute
         :param target_pad: le pad où souhaite se rendre l'astronaute
-        :param trip_money: le montant de départ pour la course (diminue avec le temps)
+        :param gate: le gate est pris en compte comme objectif quand l'astronaut geut aller en haut
         """
         super(Astronaut, self).__init__()
+        self._money_saved = None
         self.isDisembarked = False
         self._gate = gate
         self._source_pad = source_pad
@@ -139,20 +138,20 @@ class Astronaut(pygame.sprite.Sprite):
     def set_money_saved(self, money_saved: float) -> None:
         self._money_saved = money_saved
 
-    def set_arrived_target(self, arrived: bool) -> bool:
+    def set_arrived_target(self, arrived: bool) -> None:
         self._arrived_pad_target = arrived
 
     def get_arrived_target(self) -> bool:
         return self._arrived_pad_target
 
-    def is_disappearing(self):
+    def is_disappearing(self) -> bool:
         return self._state == AstronautState.DISAPPEAR
 
-    def die(self):
+    def die(self) -> None:
         self.scream_in_agony()
         self.disappear()
 
-    def has_disappeared(self):
+    def has_disappeared(self) -> bool:
         return self._disappear_animation_finished
 
     def scream_in_agony(self) -> None:
@@ -298,7 +297,10 @@ class Astronaut(pygame.sprite.Sprite):
         if self._state == AstronautState.REACHED_DESTINATION:
             return
 
-    def change_state(self, entered_state):
+    def change_state(self, entered_state) -> None:
+        """
+        Changes the state of the astronaut and resets related attributes.
+        """
         self._state = entered_state
         self._state_time = 0
         self._frames = self._all_frames[entered_state]
@@ -310,6 +312,9 @@ class Astronaut(pygame.sprite.Sprite):
         self.change_state(AstronautState.WAITING)
 
     def disappear(self) -> None:
+        """
+        Transitions the astronaut into a disappearing state.
+        """
         self.change_state(AstronautState.DISAPPEAR)
 
     def _call_taxi(self) -> None:
@@ -327,7 +332,8 @@ class Astronaut(pygame.sprite.Sprite):
                      - une liste de trames (image, masque) pour envoyer la main
                      - une liste de trames (image, masque) pour se déplacer vers la gauche
                      - une liste de trames (image, masque) pour se déplacer vers la droite
-                     - une liste de trames (image, masque) pour se téléporter
+                     - une liste de trames (image, masque) pour se apparaître
+                     - une liste de trames (image, masque) pour se dispparaître
         """
         nb_images = (Astronaut._NB_WAITING_IMAGES + Astronaut._NB_WAVING_IMAGES + Astronaut._NB_JUMPING_IMAGES +
                      Astronaut._NB_TELEPORT_IMAGES)

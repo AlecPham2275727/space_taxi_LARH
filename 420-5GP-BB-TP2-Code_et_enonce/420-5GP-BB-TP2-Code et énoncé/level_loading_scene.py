@@ -1,4 +1,3 @@
-import math
 import random
 
 import pygame
@@ -69,7 +68,8 @@ class LevelLoadingScene(Scene):
             self._taxi_direction[1] *= -1
 
     def render(self, screen: pygame.Surface) -> None:
-        scaled_surface = pygame.transform.scale(self._surface, (self._settings.SCREEN_WIDTH, self._settings.SCREEN_HEIGHT))
+        scaled_surface = pygame.transform.scale(self._surface, (self._settings.SCREEN_WIDTH,
+                                                                self._settings.SCREEN_HEIGHT))
         screen.blit(scaled_surface, (0, 0))
 
         # Agrandir et dessiner le taxi
@@ -102,7 +102,7 @@ class LevelLoadingScene(Scene):
             instructions_surface = instructions_font.render(line, True, (255, 255, 255))
             instructions_rect = instructions_surface.get_rect(center=(self._settings.SCREEN_WIDTH // 2,
                                                                       instruction_y_start + (
-                                                                                  i * 30)))  # 30 pour espacer les lignes
+                                                                                i * 30)))  # 30 pour espacer les lignes
             screen.blit(instructions_surface, instructions_rect)
 
     def surface(self) -> pygame.Surface:

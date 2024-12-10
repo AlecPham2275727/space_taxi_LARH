@@ -28,6 +28,7 @@ class LevelScene(Scene):
         :param level: le numéro de niveau
         """
         super().__init__()
+        self._last_taxied_astronaut_time = None
         self._astronaut = None
         self._settings = GameSettings()
         self.level = level
@@ -105,7 +106,6 @@ class LevelScene(Scene):
     def update(self) -> None:
         """
         Met à jour le niveau de jeu. Cette méthode est appelée à chaque itération de la boucle de jeu.
-        :param delta_time: temps écoulé (en secondes) depuis la dernière trame affichée
         """
         if not self._music_started:
             self._music.play(-1)
