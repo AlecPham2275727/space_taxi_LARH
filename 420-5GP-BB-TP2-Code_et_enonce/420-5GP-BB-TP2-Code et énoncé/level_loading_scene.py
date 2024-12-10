@@ -1,3 +1,4 @@
+import math
 import random
 
 import pygame
@@ -27,6 +28,22 @@ class LevelLoadingScene(Scene):
         self._taxi_position = [self._settings.SCREEN_WIDTH // 2, self._settings.SCREEN_HEIGHT // 2]
         self._taxi_direction = [random.choice([-1, 1]), random.choice([-1, 1])]
         self._taxi_speed = 2
+        self.etoile_image = pygame.image.load(self._settings.ETOILE).convert_alpha()
+
+        # Initialisation des points lumineux
+        self.NUM_POINTS = 40
+        self.points = [
+            {
+                # Source du code : https://www.reddit.com/r/pygame/comments/oxfw3k/drawing_a_spiral_with_pygame/?rdt=39089
+                # Source du code : https://www.geeksforgeeks.org/pygame-drawing-objects-and-shapes/
+                "x": random.randint(0, self._settings.SCREEN_WIDTH),
+                "y": random.randint(0, self._settings.SCREEN_HEIGHT),
+                "angle": random.uniform(0, 2 * math.pi),
+                "radius": random.randint(40, max(self._settings.SCREEN_WIDTH, self._settings.SCREEN_HEIGHT) // 2),
+                "speed": random.uniform(0.02, 0.05)
+            }
+            for _ in range(self.NUM_POINTS)
+        ]
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.KEYDOWN:
@@ -67,6 +84,22 @@ class LevelLoadingScene(Scene):
         if self._taxi_position[1] <= 0 or self._taxi_position[1] >= self._settings.SCREEN_HEIGHT:
             self._taxi_direction[1] *= -1
 
+        # Mise à jour des positions des points lumineux
+        # Source du code : https://www.reddit.com/r/pygame/comments/oxfw3k/drawing_a_spiral_with_pygame/?rdt=39089
+        # Source du code : https://www.geeksforgeeks.org/pygame-drawing-objects-and-shapes/
+        for point in self.points:
+            point["radius"] *= 0.98
+            point["angle"] += point["speed"]
+
+            # Calculer les nouvelles positions en fonction du rayon et de l'angle
+            point["x"] = self._settings.SCREEN_WIDTH // 2 + math.cos(point["angle"]) * point["radius"]
+            point["y"] = self._settings.SCREEN_HEIGHT // 2 + math.sin(point["angle"]) * point["radius"]
+
+            if point["radius"] < 5:
+                point["radius"] = random.randint(50, max(self._settings.SCREEN_WIDTH, self._settings.SCREEN_HEIGHT) // 2)
+                point["angle"] = random.uniform(0, 2 * math.pi)
+                point["speed"] = random.uniform(0.02, 0.05)
+
     def render(self, screen: pygame.Surface) -> None:
         scaled_surface = pygame.transform.scale(self._surface, (self._settings.SCREEN_WIDTH,
                                                                 self._settings.SCREEN_HEIGHT))
@@ -76,6 +109,14 @@ class LevelLoadingScene(Scene):
         scaled_taxi = pygame.transform.scale(self._taxi_image, (80, 40))
         taxi_rect = scaled_taxi.get_rect(center=self._taxi_position)
         screen.blit(scaled_taxi, taxi_rect)
+
+        # Dessiner les points lumineux
+        # Source du code : https://www.pygame.org/docs/ref/draw.html#pygame.draw.circle
+        # Source du code : https://www.geeksforgeeks.org/pygame-drawing-objects-and-shapes/
+        for point in self.points:
+            scaled_etoile = pygame.transform.scale(self.etoile_image, (20, 20))
+            etoile_rect = scaled_etoile.get_rect(center=(int(point["x"]), int(point["y"])))
+            screen.blit(scaled_etoile, etoile_rect)
 
         # Texte du nom du niveau
         font = pygame.font.Font(self._settings.GAME_FONT, 40)

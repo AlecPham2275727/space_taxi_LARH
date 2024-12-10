@@ -31,6 +31,7 @@ class GameSettings:
     ERROR_ICON = "img/error-icon.png"
     ROUGH_LANDING_SOUND = "snd/rough_landing_sound.wav"
     LEVEL_LOADING_SCENE = "img/ecran_chargement.png"
+    ETOILE = "img/etoile.png"
 
     _instance = None
 
